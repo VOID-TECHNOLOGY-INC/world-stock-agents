@@ -1,0 +1,91 @@
+from __future__ import annotations
+
+from datetime import date
+import numpy as np
+import pandas as pd
+
+
+def build_features_from_dummy(region: str, as_of: date, size: int = 120) -> pd.DataFrame:
+    """MVP: ダミーの銘柄と特徴量を生成。
+
+    出力列:
+      ticker, name, fundamental_x, technical_x, quality_x, news_x
+    """
+    rng = np.random.default_rng(hash((region, as_of)) % (2**32))
+    tickers = [f"{region}{i:03d}" for i in range(size)]
+    names = [f"{region}-Company-{i:03d}" for i in range(size)]
+
+    df = pd.DataFrame({
+        "ticker": tickers,
+        "name": names,
+        "fundamental_roic": rng.normal(0.2, 0.05, size).clip(0, 1),
+        "fundamental_fcf_margin": rng.normal(0.15, 0.05, size).clip(0, 1),
+        "technical_mom_12m": rng.normal(0.5, 0.2, size).clip(0, 1),
+        "technical_volume_trend": rng.normal(0.5, 0.2, size).clip(0, 1),
+        "quality_dilution": rng.normal(0.6, 0.15, size).clip(0, 1),
+        "news_signal": rng.normal(0.5, 0.2, size).clip(0, 1),
+    })
+    return df
+
+
+def build_features_from_prices(
+    region: str,
+    universe_df: pd.DataFrame,
+    prices: pd.DataFrame,
+    volumes: pd.DataFrame,
+) -> pd.DataFrame:
+    """価格データからテクニカル特徴量を生成。その他は定数(0.5)のMVP。
+
+    - technical_mom_{1,3,6,12}m: リターン
+    - technical_volume_trend: 直近10日/60日出来高移動平均の比率
+    """
+    tickers = [t for t in universe_df["ticker"] if t in prices.columns]
+    if not tickers:
+        return pd.DataFrame(columns=[
+            "ticker", "name", "fundamental_roic", "fundamental_fcf_margin",
+            "technical_mom_12m", "technical_mom_6m", "technical_mom_3m", "technical_mom_1m",
+            "technical_volume_trend", "quality_dilution", "news_signal",
+        ])
+
+    feats = []
+    for t in tickers:
+        s = prices[t].dropna()
+        v = volumes[t].dropna() if t in volumes else None
+        if s.empty:
+            continue
+        def mom(days: int) -> float:
+            if len(s) <= days or s.iloc[-days] == 0:
+                return np.nan
+            return float(s.iloc[-1] / s.iloc[-days] - 1.0)
+
+        m12 = mom(252)
+        m6 = mom(126)
+        m3 = mom(63)
+        m1 = mom(21)
+
+        vol_trend = np.nan
+        if v is not None and not v.empty:
+            ma10 = v.rolling(10).mean()
+            ma60 = v.rolling(60).mean()
+            if not ma10.dropna().empty and not ma60.dropna().empty and ma60.iloc[-1] not in (0, np.nan):
+                vol_trend = float(ma10.iloc[-1] / ma60.iloc[-1])
+
+        name = universe_df.loc[universe_df["ticker"] == t, "name"].values[0]
+        feats.append({
+            "ticker": t,
+            "name": name,
+            # MVP: ファンダ/質/ニュースは一定値
+            "fundamental_roic": 0.5,
+            "fundamental_fcf_margin": 0.5,
+            "technical_mom_12m": m12,
+            "technical_mom_6m": m6,
+            "technical_mom_3m": m3,
+            "technical_mom_1m": m1,
+            "technical_volume_trend": vol_trend,
+            "quality_dilution": 0.5,
+            "news_signal": 0.5,
+        })
+
+    return pd.DataFrame(feats)
+
+

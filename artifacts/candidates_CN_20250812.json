@@ -1,0 +1,367 @@
+{
+  "region": "CN",
+  "as_of": "2025-08-12",
+  "universe": "REAL",
+  "candidates": [
+    {
+      "ticker": "0941.HK",
+      "name": "China Mobile",
+      "score_overall": 0.5875,
+      "score_breakdown": {
+        "fundamental": 0.5,
+        "technical": 0.75,
+        "quality": 0.5,
+        "news": 0.5
+      },
+      "thesis": "投資仮説: China Mobileは、安定したファンダメンタルと高いテクニカル評価を持つため、成長が期待できる企業である。特に、通信業界の需要増加に伴い、収益の向上が見込まれる。",
+      "risks": [
+        "主なリスク:",
+        "規制の変化による影響",
+        "競争の激化による市場シェアの減少"
+      ],
+      "evidence": [
+        {
+          "type": "metric",
+          "name": "ROIC_TTM",
+          "value": 25.48
+        }
+      ]
+    },
+    {
+      "ticker": "000333.SZ",
+      "name": "Midea Group",
+      "score_overall": 0.5596391133167531,
+      "score_breakdown": {
+        "fundamental": 0.5,
+        "technical": 0.6703974666192946,
+        "quality": 0.5,
+        "news": 0.5
+      },
+      "thesis": "投資仮説: Midea Groupは、技術的な強みと安定したファンダメンタルズを持ち、成長が期待される企業であるため、投資に適した選択肢となる可能性があります。",
+      "risks": [
+        "主なリスク:",
+        "市場競争の激化により、シェアが減少するリスク。",
+        "経済状況の変動が消費者需要に影響を与えるリスク。"
+      ],
+      "evidence": [
+        {
+          "type": "metric",
+          "name": "ROIC_TTM",
+          "value": 18.78
+        }
+      ]
+    },
+    {
+      "ticker": "601988.SS",
+      "name": "Bank of China A",
+      "score_overall": 0.5441799890728539,
+      "score_breakdown": {
+        "fundamental": 0.5,
+        "technical": 0.626228540208154,
+        "quality": 0.5,
+        "news": 0.5
+      },
+      "thesis": "投資仮説: 中国銀行（Bank of China A）は、安定したファンダメンタルズと技術的な強さを持ち、今後の成長が期待される。市場の動向やニュースに対する反応が中立的であるため、リスクを管理しつつ投資する価値がある。",
+      "risks": [
+        "主なリスク:",
+        "中国経済の成長鈍化による業績悪化の可能性",
+        "規制強化や政策変更による影響"
+      ],
+      "evidence": [
+        {
+          "type": "metric",
+          "name": "ROIC_TTM",
+          "value": 27.17
+        }
+      ]
+    },
+    {
+      "ticker": "600519.SS",
+      "name": "Kweichow Moutai",
+      "score_overall": 0.543129944748347,
+      "score_breakdown": {
+        "fundamental": 0.5,
+        "technical": 0.6232284135667057,
+        "quality": 0.5,
+        "news": 0.5
+      },
+      "thesis": "投資仮説: Kweichow Moutaiは、中国の高級酒市場において強力なブランド力を持ち、安定した収益を期待できる企業であるため、長期的な成長が見込まれる。特に、消費者の高級志向の高まりが追い風となる可能性がある。",
+      "risks": [
+        "主なリスク:",
+        "中国経済の減速による消費者支出の低下",
+        "政府の規制強化や税制変更による影響"
+      ],
+      "evidence": [
+        {
+          "type": "metric",
+          "name": "ROIC_TTM",
+          "value": 23.95
+        }
+      ]
+    },
+    {
+      "ticker": "0700.HK",
+      "name": "Tencent Holdings",
+      "score_overall": 0.5400699191239473,
+      "score_breakdown": {
+        "fundamental": 0.5,
+        "technical": 0.614485483211278,
+        "quality": 0.5,
+        "news": 0.5
+      },
+      "thesis": "投資仮説: Tencent Holdingsは、テクノロジーとエンターテインメントの分野での強力な市場ポジションを持ち、安定した成長が期待される企業です。技術的な指標も良好であり、今後の成長が見込まれます。",
+      "risks": [
+        "主なリスク:",
+        "規制の強化: 中国政府によるテクノロジー企業への規制が影響を及ぼす可能性。",
+        "市場競争: 国内外の競合企業との競争が激化するリスク。"
+      ],
+      "evidence": [
+        {
+          "type": "metric",
+          "name": "ROIC_TTM",
+          "value": 11.88
+        }
+      ]
+    },
+    {
+      "ticker": "601318.SS",
+      "name": "Ping An Insurance A",
+      "score_overall": 0.5305092837687083,
+      "score_breakdown": {
+        "fundamental": 0.5,
+        "technical": 0.5871693821963093,
+        "quality": 0.5,
+        "news": 0.5
+      },
+      "thesis": "投資仮説: Ping An Insurance Aは、安定したファンダメンタルとテクニカル指標を持ち、成長の可能性があるため、投資対象として魅力的である。特に、保険業界の成長とデジタル化の進展が期待される。",
+      "risks": [
+        "主なリスク:",
+        "中国経済の減速による保険需要の低下",
+        "規制の変化や政府の介入による業務運営への影響"
+      ],
+      "evidence": [
+        {
+          "type": "metric",
+          "name": "ROIC_TTM",
+          "value": 29.51
+        }
+      ]
+    },
+    {
+      "ticker": "2318.HK",
+      "name": "Ping An Insurance H",
+      "score_overall": 0.5153465285305104,
+      "score_breakdown": {
+        "fundamental": 0.5,
+        "technical": 0.5438472243728869,
+        "quality": 0.5,
+        "news": 0.5
+      },
+      "thesis": "投資仮説: Ping An Insurance (2318.HK)は、安定したファンダメンタルと技術的な指標を持ち、長期的な成長が期待できる保険会社である。市場の変動に対しても一定の耐性を持つと考えられる。",
+      "risks": [
+        "主なリスク:",
+        "中国経済の減速による保険需要の低下",
+        "規制の変化が業務運営に与える影響"
+      ],
+      "evidence": [
+        {
+          "type": "metric",
+          "name": "ROIC_TTM",
+          "value": 25.22
+        }
+      ]
+    },
+    {
+      "ticker": "JD",
+      "name": "JD.com ADR",
+      "score_overall": 0.5112207656628595,
+      "score_breakdown": {
+        "fundamental": 0.5,
+        "technical": 0.5320593304653127,
+        "quality": 0.5,
+        "news": 0.5
+      },
+      "thesis": "投資仮説: JD.comは、中国の大手Eコマース企業として、安定した成長が期待されるが、競争環境や規制の影響を受ける可能性がある。ファンダメンタルズとテクニカル指標が中程度の水準であることから、慎重な投資が求められる。",
+      "risks": [
+        "主なリスク:",
+        "中国政府の規制強化による事業運営への影響",
+        "競合他社との激しい価格競争"
+      ],
+      "evidence": [
+        {
+          "type": "metric",
+          "name": "ROIC_TTM",
+          "value": 25.72
+        }
+      ]
+    },
+    {
+      "ticker": "BABA",
+      "name": "Alibaba Group ADR",
+      "score_overall": 0.5005228388132559,
+      "score_breakdown": {
+        "fundamental": 0.5,
+        "technical": 0.501493825180731,
+        "quality": 0.5,
+        "news": 0.5
+      },
+      "thesis": "投資仮説: Alibaba Groupは、中国市場における強力な地位を持ち、成長の可能性があるが、規制や競争の影響を受ける可能性がある。ファンダメンタルやテクニカル指標は中立的な水準にあり、投資判断には慎重さが求められる。",
+      "risks": [
+        "主なリスク:",
+        "中国政府の規制強化による業績への影響",
+        "国内外の競争の激化"
+      ],
+      "evidence": [
+        {
+          "type": "metric",
+          "name": "ROIC_TTM",
+          "value": 12.56
+        }
+      ]
+    },
+    {
+      "ticker": "000858.SZ",
+      "name": "Wuliangye Yibin",
+      "score_overall": 0.494924355113863,
+      "score_breakdown": {
+        "fundamental": 0.5,
+        "technical": 0.48549815746818015,
+        "quality": 0.5,
+        "news": 0.5
+      },
+      "thesis": "投資仮説: Wuliangye Yibinは、中国の高級酒市場において強固なブランドを持ち、安定した収益を期待できる企業であるため、長期的な成長が見込まれる。市場の需要に応じた戦略的な展開が成功すれば、さらなる成長が期待できる。",
+      "risks": [
+        "主なリスク:",
+        "中国の経済成長の鈍化による消費者需要の減少",
+        "競争の激化による市場シェアの減少"
+      ],
+      "evidence": [
+        {
+          "type": "metric",
+          "name": "ROIC_TTM",
+          "value": 19.01
+        }
+      ]
+    },
+    {
+      "ticker": "NTES",
+      "name": "NetEase ADR",
+      "score_overall": 0.48140831610711754,
+      "score_breakdown": {
+        "fundamental": 0.5,
+        "technical": 0.44688090316319296,
+        "quality": 0.5,
+        "news": 0.5
+      },
+      "thesis": "投資仮説: NetEaseは、中国のオンラインゲームやデジタルコンテンツ市場での強固な地位を持ち、安定したファンダメンタルズを背景に成長が期待される。技術的指標も一定の水準を維持しており、今後の業績向上が見込まれる。",
+      "risks": [
+        "主なリスク:",
+        "中国政府の規制強化による業績への影響",
+        "グローバルな競争の激化"
+      ],
+      "evidence": [
+        {
+          "type": "metric",
+          "name": "ROIC_TTM",
+          "value": 17.42
+        }
+      ]
+    },
+    {
+      "ticker": "1398.HK",
+      "name": "ICBC H",
+      "score_overall": 0.4684193045902989,
+      "score_breakdown": {
+        "fundamental": 0.5,
+        "technical": 0.40976944168656837,
+        "quality": 0.5,
+        "news": 0.5
+      },
+      "thesis": "投資仮説: ICBC H（中国工商銀行）は、安定したファンダメンタルと品質を持ち、技術的指標も一定の水準にあるため、長期的な成長が期待できる。市場のニュースや外部要因に対する感度が中程度であることから、リスクを管理しやすい。",
+      "risks": [
+        "主なリスク:",
+        "中国経済の不確実性や成長鈍化による影響",
+        "金利変動や規制強化による収益性の圧迫"
+      ],
+      "evidence": [
+        {
+          "type": "metric",
+          "name": "ROIC_TTM",
+          "value": 28.54
+        }
+      ]
+    },
+    {
+      "ticker": "0883.HK",
+      "name": "CNOOC",
+      "score_overall": 0.4634399237461534,
+      "score_breakdown": {
+        "fundamental": 0.5,
+        "technical": 0.395542639274724,
+        "quality": 0.5,
+        "news": 0.5
+      },
+      "thesis": "投資仮説: CNOOCは、安定したファンダメンタルと品質を持ちながら、技術的な指標がやや低いことから、今後の市場環境において成長の余地があると考えられます。",
+      "risks": [
+        "主なリスク:",
+        "原油価格の変動による収益への影響",
+        "政治的リスクや規制の変化"
+      ],
+      "evidence": [
+        {
+          "type": "metric",
+          "name": "ROIC_TTM",
+          "value": 22.88
+        }
+      ]
+    },
+    {
+      "ticker": "PDD",
+      "name": "PDD Holdings ADR",
+      "score_overall": 0.4601816226204306,
+      "score_breakdown": {
+        "fundamental": 0.5,
+        "technical": 0.38623320748694456,
+        "quality": 0.5,
+        "news": 0.5
+      },
+      "thesis": "投資仮説: PDD Holdingsは、中国のEコマース市場において強力な成長を続けており、ファンダメンタルズとクオリティが安定しているため、長期的な投資先として魅力的である。テクニカル指標も一定の支持を示していることから、短期的なトレンドにも注目すべきである。",
+      "risks": [
+        "主なリスク:",
+        "中国政府の規制強化によるビジネス環境の変化",
+        "国内外の競争激化による市場シェアの減少"
+      ],
+      "evidence": [
+        {
+          "type": "metric",
+          "name": "ROIC_TTM",
+          "value": 26.46
+        }
+      ]
+    },
+    {
+      "ticker": "3988.HK",
+      "name": "Bank of China H",
+      "score_overall": 0.4125,
+      "score_breakdown": {
+        "fundamental": 0.5,
+        "technical": 0.25,
+        "quality": 0.5,
+        "news": 0.5
+      },
+      "thesis": "投資仮説: Bank of China Hは、ファンダメンタルとクオリティが中程度であり、ニュースの影響を受けやすい状況にあるため、適切な投資タイミングを見極めることでリターンが期待できる。テクニカル指標が低めであることから、短期的なボラティリティには注意が必要である。",
+      "risks": [
+        "主なリスク:",
+        "中国経済の成長鈍化による業績悪化の可能性",
+        "規制強化や政策変更による影響"
+      ],
+      "evidence": [
+        {
+          "type": "metric",
+          "name": "ROIC_TTM",
+          "value": 18.87
+        }
+      ]
+    }
+  ]
+}

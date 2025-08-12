@@ -1,0 +1,487 @@
+{
+  "region": "EU",
+  "as_of": "2025-08-12",
+  "universe": "REAL",
+  "candidates": [
+    {
+      "ticker": "AZN.L",
+      "name": "AstraZeneca",
+      "score_overall": 0.5875,
+      "score_breakdown": {
+        "fundamental": 0.5,
+        "technical": 0.75,
+        "quality": 0.5,
+        "news": 0.5
+      },
+      "thesis": "投資仮説: AstraZenecaは、堅実なファンダメンタルと高いテクニカル指標を持ち、今後の成長が期待される。特に新薬の開発や承認が進む中で、株価の上昇が見込まれる。",
+      "risks": [
+        "主なリスク:",
+        "新薬の承認遅延や失敗による収益減少の可能性",
+        "競合他社の新薬による市場シェアの喪失"
+      ],
+      "evidence": [
+        {
+          "type": "metric",
+          "name": "ROIC_TTM",
+          "value": 25.48
+        }
+      ]
+    },
+    {
+      "ticker": "BN.PA",
+      "name": "Danone",
+      "score_overall": 0.564760355184452,
+      "score_breakdown": {
+        "fundamental": 0.5,
+        "technical": 0.6850295862412914,
+        "quality": 0.5,
+        "news": 0.5
+      },
+      "thesis": "投資仮説: Danoneは、安定したファンダメンタルズと技術的な強さを持ち、成長の可能性があるため、投資対象として魅力的です。市場の変動や競争環境に対する耐性が求められます。",
+      "risks": [
+        "主なリスク:",
+        "原材料費の高騰による利益圧迫",
+        "健康志向の変化による製品需要の変動"
+      ],
+      "evidence": [
+        {
+          "type": "metric",
+          "name": "ROIC_TTM",
+          "value": 18.78
+        }
+      ]
+    },
+    {
+      "ticker": "MUV2.DE",
+      "name": "Munich Re",
+      "score_overall": 0.5441283301872606,
+      "score_breakdown": {
+        "fundamental": 0.5,
+        "technical": 0.6260809433921731,
+        "quality": 0.5,
+        "news": 0.5
+      },
+      "thesis": "投資仮説: Munich Reは安定したファンダメンタルとテクニカル指標を持ち、保険業界のリーダーとしての地位を活かして成長が期待できる。特に、リスク管理や再保険市場における強みが長期的な収益性を支えると考えられる。",
+      "risks": [
+        "主なリスク:",
+        "自然災害やパンデミックによる保険金支払いの増加",
+        "金利の変動による投資収益の影響"
+      ],
+      "evidence": [
+        {
+          "type": "metric",
+          "name": "ROIC_TTM",
+          "value": 27.17
+        }
+      ]
+    },
+    {
+      "ticker": "HSBA.L",
+      "name": "HSBC Holdings",
+      "score_overall": 0.5149289078876186,
+      "score_breakdown": {
+        "fundamental": 0.5,
+        "technical": 0.542654022536053,
+        "quality": 0.5,
+        "news": 0.5
+      },
+      "thesis": "投資仮説: HSBC Holdingsは、バランスの取れたファンダメンタルとテクニカル指標を持ち、安定した収益を期待できる金融機関であるため、投資対象として魅力的である。特に、グローバルな展開と多様なサービスが強みとなる。",
+      "risks": [
+        "主なリスク:",
+        "経済環境の変動による影響（特に金利や為替の変動）",
+        "規制の変化やコンプライアンスリスク"
+      ],
+      "evidence": [
+        {
+          "type": "metric",
+          "name": "ROIC_TTM",
+          "value": 23.95
+        }
+      ]
+    },
+    {
+      "ticker": "AD.AS",
+      "name": "Ahold Delhaize",
+      "score_overall": 0.5059089509011104,
+      "score_breakdown": {
+        "fundamental": 0.5,
+        "technical": 0.5168827168603154,
+        "quality": 0.5,
+        "news": 0.5
+      },
+      "thesis": "投資仮説: Ahold Delhaizeは、安定したファンダメンタルとテクニカル指標を持ち、欧州の小売市場での競争力を維持しているため、長期的な成長が期待できる。特に、デジタル化や効率化の進展が業績を押し上げる可能性がある。",
+      "risks": [
+        "主なリスク:",
+        "経済環境の変動による消費者支出の減少",
+        "競合他社との価格競争の激化"
+      ],
+      "evidence": [
+        {
+          "type": "metric",
+          "name": "ROIC_TTM",
+          "value": 11.88
+        }
+      ]
+    },
+    {
+      "ticker": "ENEL.MI",
+      "name": "Enel",
+      "score_overall": 0.5012253895706622,
+      "score_breakdown": {
+        "fundamental": 0.5,
+        "technical": 0.5035011130590348,
+        "quality": 0.5,
+        "news": 0.5
+      },
+      "thesis": "投資仮説: Enelは安定したファンダメンタルとテクニカル指標を持ち、持続可能なエネルギーへの移行に伴う成長が期待されるため、投資対象として魅力的である。特に、欧州のエネルギー市場におけるリーダーシップを活かし、収益性を向上させる可能性がある。",
+      "risks": [
+        "主なリスク:",
+        "欧州のエネルギー政策の変動による影響",
+        "為替リスク、特にユーロの変動"
+      ],
+      "evidence": [
+        {
+          "type": "metric",
+          "name": "ROIC_TTM",
+          "value": 29.51
+        }
+      ]
+    },
+    {
+      "ticker": "SIE.DE",
+      "name": "Siemens AG",
+      "score_overall": 0.49184433396237914,
+      "score_breakdown": {
+        "fundamental": 0.5,
+        "technical": 0.476698097035369,
+        "quality": 0.5,
+        "news": 0.5
+      },
+      "thesis": "投資仮説: シーメンスAGは、ファンダメンタルズとクオリティが中程度であり、テクニカル指標も安定しているため、今後の成長が期待できる企業である。特に、デジタル化や自動化の進展に伴い、同社の製品やサービスの需要が高まる可能性がある。",
+      "risks": [
+        "主なリスク:",
+        "経済環境の変動による需要の減少",
+        "競合他社の技術革新による市場シェアの喪失"
+      ],
+      "evidence": [
+        {
+          "type": "metric",
+          "name": "ROIC_TTM",
+          "value": 25.22
+        }
+      ]
+    },
+    {
+      "ticker": "NESN.SW",
+      "name": "Nestle",
+      "score_overall": 0.49171171606140385,
+      "score_breakdown": {
+        "fundamental": 0.5,
+        "technical": 0.4763191887468682,
+        "quality": 0.5,
+        "news": 0.5
+      },
+      "thesis": "投資仮説: ネスレは安定したファンダメンタルと品質を持ち、テクニカル指標も悪くないため、長期的な成長が期待できる。市場の変動にも耐えうるポートフォリオを持つ企業として、投資対象として魅力的である。",
+      "risks": [
+        "主なリスク:",
+        "原材料価格の変動による利益圧迫",
+        "グローバルな経済不況による消費者需要の減少"
+      ],
+      "evidence": [
+        {
+          "type": "metric",
+          "name": "ROIC_TTM",
+          "value": 25.72
+        }
+      ]
+    },
+    {
+      "ticker": "OR.PA",
+      "name": "L'Oreal",
+      "score_overall": 0.48318048539829495,
+      "score_breakdown": {
+        "fundamental": 0.5,
+        "technical": 0.45194424399512834,
+        "quality": 0.5,
+        "news": 0.5
+      },
+      "thesis": "投資仮説: L'Orealは、安定したファンダメンタルと品質を持つ企業であり、技術的な指標も一定の水準を維持しているため、今後の成長が期待できる。市場の変動や競争環境を考慮しつつ、長期的な投資対象として魅力的である。",
+      "risks": [
+        "主なリスク:",
+        "経済の不確実性による消費者支出の減少",
+        "競合他社の激化による市場シェアの喪失"
+      ],
+      "evidence": [
+        {
+          "type": "metric",
+          "name": "ROIC_TTM",
+          "value": 12.56
+        }
+      ]
+    },
+    {
+      "ticker": "ULVR.L",
+      "name": "Unilever",
+      "score_overall": 0.48141218816333026,
+      "score_breakdown": {
+        "fundamental": 0.5,
+        "technical": 0.4468919661809436,
+        "quality": 0.5,
+        "news": 0.5
+      },
+      "thesis": "投資仮説: Unileverは、安定したファンダメンタルと品質を持ち、テクニカル指標も改善の兆しを見せているため、長期的な成長が期待できる企業です。",
+      "risks": [
+        "主なリスク:",
+        "原材料価格の変動による利益率の圧迫",
+        "グローバルな経済不況による消費者需要の減少"
+      ],
+      "evidence": [
+        {
+          "type": "metric",
+          "name": "ROIC_TTM",
+          "value": 19.01
+        }
+      ]
+    },
+    {
+      "ticker": "BMW.DE",
+      "name": "BMW AG",
+      "score_overall": 0.4759569891134046,
+      "score_breakdown": {
+        "fundamental": 0.5,
+        "technical": 0.43130568318115603,
+        "quality": 0.5,
+        "news": 0.5
+      },
+      "thesis": "投資仮説: BMW AGは、安定したファンダメンタルと品質を持ちながら、技術的な指標も改善の余地があるため、今後の成長が期待できる。特に、電動車両市場へのシフトが進む中で、競争力を維持する可能性がある。",
+      "risks": [
+        "主なリスク:",
+        "電動車両市場における競争の激化",
+        "原材料価格の変動によるコスト圧迫"
+      ],
+      "evidence": [
+        {
+          "type": "metric",
+          "name": "ROIC_TTM",
+          "value": 17.42
+        }
+      ]
+    },
+    {
+      "ticker": "AIR.PA",
+      "name": "Airbus",
+      "score_overall": 0.46644344968924206,
+      "score_breakdown": {
+        "fundamental": 0.5,
+        "technical": 0.40412414196926305,
+        "quality": 0.5,
+        "news": 0.5
+      },
+      "thesis": "投資仮説: Airbusは安定したファンダメンタルと品質を持ち、技術的指標も改善傾向にあるため、長期的な成長が期待できる。市場の需要回復に伴い、航空機の需要が増加する可能性がある。",
+      "risks": [
+        "主なリスク:",
+        "グローバルな経済不況による航空需要の減少",
+        "サプライチェーンの混乱や部品不足"
+      ],
+      "evidence": [
+        {
+          "type": "metric",
+          "name": "ROIC_TTM",
+          "value": 28.54
+        }
+      ]
+    },
+    {
+      "ticker": "ITX.MC",
+      "name": "Inditex",
+      "score_overall": 0.46317996467269645,
+      "score_breakdown": {
+        "fundamental": 0.5,
+        "technical": 0.39479989906484697,
+        "quality": 0.5,
+        "news": 0.5
+      },
+      "thesis": "投資仮説: Inditexは、ファッション小売業界において強固なブランド力と効率的なサプライチェーンを持ち、安定した成長が期待される。市場の変動に対しても柔軟に対応できるため、長期的な投資先として魅力的である。",
+      "risks": [
+        "主なリスク:",
+        "経済状況の変化による消費者の購買意欲の低下",
+        "競争の激化による市場シェアの減少"
+      ],
+      "evidence": [
+        {
+          "type": "metric",
+          "name": "ROIC_TTM",
+          "value": 22.88
+        }
+      ]
+    },
+    {
+      "ticker": "DTE.DE",
+      "name": "Deutsche Telekom",
+      "score_overall": 0.45289378670094077,
+      "score_breakdown": {
+        "fundamental": 0.5,
+        "technical": 0.3654108191455451,
+        "quality": 0.5,
+        "news": 0.5
+      },
+      "thesis": "投資仮説: Deutsche Telekomは、安定したファンダメンタルと品質を持ち、テクニカル指標も改善傾向にあるため、長期的な成長が期待できる。ニュースの影響も中立的であり、投資対象として魅力的である。",
+      "risks": [
+        "主なリスク:",
+        "市場競争の激化による収益圧迫",
+        "規制の変化や政策リスク"
+      ],
+      "evidence": [
+        {
+          "type": "metric",
+          "name": "ROIC_TTM",
+          "value": 26.46
+        }
+      ]
+    },
+    {
+      "ticker": "SHEL.L",
+      "name": "Shell Plc (LSE)",
+      "score_overall": 0.4526616116989399,
+      "score_breakdown": {
+        "fundamental": 0.5,
+        "technical": 0.3647474619969713,
+        "quality": 0.5,
+        "news": 0.5
+      },
+      "thesis": "投資仮説: Shell Plcは、ファンダメンタルやクオリティが中程度であり、テクニカル指標がやや低いものの、ニュースの影響を受けやすい状況にあるため、短期的な市場の動向を注視することで投資機会が見込まれます。",
+      "risks": [
+        "主なリスク:",
+        "原油価格の変動による収益への影響",
+        "環境規制の強化による事業運営コストの増加"
+      ],
+      "evidence": [
+        {
+          "type": "metric",
+          "name": "ROIC_TTM",
+          "value": 18.87
+        }
+      ]
+    },
+    {
+      "ticker": "ENI.MI",
+      "name": "Eni",
+      "score_overall": 0.4494028043992617,
+      "score_breakdown": {
+        "fundamental": 0.5,
+        "technical": 0.3554365839978907,
+        "quality": 0.5,
+        "news": 0.5
+      },
+      "thesis": "投資仮説: Eniは、安定したファンダメンタルと品質を持ちながら、テクニカル指標が低迷しているため、今後の市場環境の改善により株価が上昇する可能性がある。特に、エネルギー需要の回復や再生可能エネルギーへのシフトが追い風となると考えられる。",
+      "risks": [
+        "主なリスク:",
+        "エネルギー価格の変動による収益の不安定化",
+        "環境規制の強化によるコスト増加"
+      ],
+      "evidence": [
+        {
+          "type": "metric",
+          "name": "ROIC_TTM",
+          "value": 14.54
+        }
+      ]
+    },
+    {
+      "ticker": "ASML.AS",
+      "name": "ASML Holding (AMS)",
+      "score_overall": 0.43299271405565287,
+      "score_breakdown": {
+        "fundamental": 0.5,
+        "technical": 0.3085506115875797,
+        "quality": 0.5,
+        "news": 0.5
+      },
+      "thesis": "投資仮説: ASML Holdingは、半導体製造装置のリーダーとして、技術革新と市場の需要に支えられた成長が期待される。ファンダメンタルとクオリティが中程度であるため、安定したパフォーマンスが見込まれる。",
+      "risks": [
+        "主なリスク:",
+        "半導体市場の需要変動による売上の不確実性",
+        "地政学的リスクや貿易制限が業績に与える影響"
+      ],
+      "evidence": [
+        {
+          "type": "metric",
+          "name": "ROIC_TTM",
+          "value": 21.09
+        }
+      ]
+    },
+    {
+      "ticker": "SAP.DE",
+      "name": "SAP SE",
+      "score_overall": 0.42919579577201167,
+      "score_breakdown": {
+        "fundamental": 0.5,
+        "technical": 0.297702273634319,
+        "quality": 0.5,
+        "news": 0.5
+      },
+      "thesis": "投資仮説: SAP SEは、堅実なファンダメンタルと品質を持ちながらも、テクニカル指標が低迷しているため、今後の成長が期待できる可能性がある。市場の変化に適応し、デジタルトランスフォーメーションの需要を取り込むことで、業績向上が見込まれる。",
+      "risks": [
+        "主なリスク:",
+        "経済環境の変化による需要減少",
+        "競合他社の技術革新による市場シェアの喪失"
+      ],
+      "evidence": [
+        {
+          "type": "metric",
+          "name": "ROIC_TTM",
+          "value": 11.28
+        }
+      ]
+    },
+    {
+      "ticker": "MC.PA",
+      "name": "LVMH",
+      "score_overall": 0.4188897169038201,
+      "score_breakdown": {
+        "fundamental": 0.5,
+        "technical": 0.26825633401091453,
+        "quality": 0.5,
+        "news": 0.5
+      },
+      "thesis": "投資仮説: LVMHは、ブランド力と多様なポートフォリオを持つ高級品メーカーであり、安定したファンダメンタルとニュースの影響を受けて成長が期待される。テクニカル指標はやや弱いものの、長期的な成長ポテンシャルがあると考えられる。",
+      "risks": [
+        "主なリスク:",
+        "経済の不況や消費者の購買意欲の低下による売上減少の可能性",
+        "原材料費の上昇による利益率の圧迫"
+      ],
+      "evidence": [
+        {
+          "type": "metric",
+          "name": "ROIC_TTM",
+          "value": 26.55
+        }
+      ]
+    },
+    {
+      "ticker": "BP.L",
+      "name": "BP Plc",
+      "score_overall": 0.4125,
+      "score_breakdown": {
+        "fundamental": 0.5,
+        "technical": 0.25,
+        "quality": 0.5,
+        "news": 0.5
+      },
+      "thesis": "投資仮説: BP Plcは、エネルギー市場の変動に対応する能力と持続可能なエネルギーへの移行を進める戦略を持っており、中長期的な成長が期待できる。現在のファンダメンタルズとニュースの評価が中程度であることから、投資のタイミングを見極めることが重要である。",
+      "risks": [
+        "主なリスク:",
+        "エネルギー価格の変動による収益への影響",
+        "環境規制の強化によるコスト増加"
+      ],
+      "evidence": [
+        {
+          "type": "metric",
+          "name": "ROIC_TTM",
+          "value": 22.63
+        }
+      ]
+    }
+  ]
+}
