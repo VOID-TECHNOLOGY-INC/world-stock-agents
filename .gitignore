@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.DS_Store
+
+# Virtual env
+.venv/
+venv/
+env/
+
+# Local artifacts and logs
+artifacts/
+logs/
+
+# Jupyter/VSCode
+.ipynb_checkpoints/
+.vscode/
+
