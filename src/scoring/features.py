@@ -89,3 +89,33 @@ def build_features_from_prices(
     return pd.DataFrame(feats)
 
 
+def merge_fundamentals(features_df: pd.DataFrame, fundamentals_df: pd.DataFrame) -> pd.DataFrame:
+    df = features_df.merge(fundamentals_df, on="ticker", how="left")
+    # マッピング: 外部列名→内部スコアに寄与する列（MVPはROIC/FCF）
+    if "roic" in df.columns:
+        df["fundamental_roic"] = df["roic"].astype(float, errors="ignore").fillna(df["fundamental_roic"])
+    if "fcf_margin" in df.columns:
+        df["fundamental_fcf_margin"] = (
+            df["fcf_margin"].astype(float, errors="ignore").fillna(df["fundamental_fcf_margin"])
+        )
+    return df
+
+
+def merge_news_signal(features_df: pd.DataFrame, news_items: list[dict]) -> pd.DataFrame:
+    if not news_items:
+        return features_df
+    df = features_df.copy()
+    # MVP: チケットごとの件数を単純に0..1にスケール
+    import pandas as pd
+    news_df = pd.DataFrame(news_items)
+    if "ticker" not in news_df.columns:
+        return df
+    counts = news_df.groupby("ticker").size().rename("news_count").reset_index()
+    df = df.merge(counts, on="ticker", how="left")
+    maxc = df["news_count"].max()
+    if pd.notna(maxc) and maxc > 0:
+        df["news_signal"] = df["news_count"].fillna(0) / maxc
+    df.drop(columns=[c for c in ["news_count"] if c in df.columns], inplace=True)
+    return df
+
+

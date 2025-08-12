@@ -8,11 +8,18 @@ import numpy as np
 import pandas as pd
 
 from ..scoring.scoring import ScoreWeights, score_candidates
-from ..scoring.features import build_features_from_dummy, build_features_from_prices
+from ..scoring.features import (
+    build_features_from_dummy,
+    build_features_from_prices,
+    merge_fundamentals,
+    merge_news_signal,
+)
 from ..scoring.normalize import normalize_features
 from .openai_agent import is_openai_configured, generate_thesis_and_risks
 from ..io.loaders import load_universe
 from ..tools.marketdata import MarketDataClient
+from ..tools.fundamentals import FundamentalsClient
+from ..tools.news import NewsClient
 
 
 @dataclass
@@ -32,6 +39,18 @@ class RegionAgent:
             prices, volumes = mkt.get_prices(uni["ticker"].tolist(), lookback_days=260)
             if prices is not None and not prices.empty:
                 df_features = build_features_from_prices(self.name, uni, prices, volumes)
+                # ファンダ
+                fcli = self.tools.get("fundamentals") if self.tools else None
+                if not isinstance(fcli, FundamentalsClient):
+                    fcli = FundamentalsClient()
+                fdf = fcli.get_fundamentals(uni["ticker"].tolist(), ["roic", "fcf_margin"])  # MVP
+                df_features = merge_fundamentals(df_features, fdf)
+                # ニュース
+                ncli = self.tools.get("news") if self.tools else None
+                if not isinstance(ncli, NewsClient):
+                    ncli = NewsClient()
+                news_items = ncli.get_news(uni["ticker"].tolist(), as_of)
+                df_features = merge_news_signal(df_features, news_items)
         except Exception:
             df_features = None
         if df_features is None or df_features.empty:
