@@ -52,7 +52,7 @@ def optimize_portfolio(
             prices[t] = 100 * (1 + pd.Series(rets)).cumprod()
         rets = prices.pct_change().dropna()
     else:
-        rets = prices_df[tickers].pct_change().dropna()
+        rets = prices_df[tickers].pct_change(fill_method=None).dropna(how="all")
 
     mu = rets.mean() * 252
     cov = rets.cov() * 252

@@ -7,7 +7,7 @@ import pandas as pd
 def compute_returns(prices: pd.DataFrame, method: str = "log") -> pd.DataFrame:
     prices = prices.sort_index()
     if method == "pct":
-        rets = prices.pct_change()
+        rets = prices.pct_change(fill_method=None)
     else:
         rets = np.log(prices / prices.shift(1))
     return rets.dropna(how="all")
