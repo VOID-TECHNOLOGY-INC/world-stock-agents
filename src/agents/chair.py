@@ -35,6 +35,15 @@ def build_report(candidates_all: list[dict], portfolio: dict, kpi: dict) -> str:
         lines.append(f"{w['ticker']} | {w['region']} | {w['weight']:.2%}")
     lines.append(f"Cash | - | {portfolio.get('cash_weight', 0.0):.2%}")
 
+    # 簡易: リスク指標の存在をヘッダで示す
+    if kpi and isinstance(kpi, dict) and kpi.get("metrics"):
+        lines.append("")
+        lines.append("## リスク指標 (概要)")
+        met = kpi.get("metrics", {})
+        keys = [k for k in ("volatility", "max_drawdown") if k in met]
+        if keys:
+            lines.append("- Included: " + ", ".join(keys))
+
     return "\n".join(lines)
 
 
