@@ -14,6 +14,8 @@ from .agents.regions import RegionAgent
 from .agents.chair import build_report
 from .agents.optimizer import optimize_portfolio
 from .tools.marketdata import MarketDataClient
+from .agents.risk import RiskAgent
+from .tools.risk_tool import compute_returns
 
 
 app = typer.Typer(add_completion=False, no_args_is_help=True)
@@ -85,12 +87,27 @@ def run(
     print(f"[bold]Run weekly[/bold] regions={region_list} date={as_of}")
 
     candidates_all: List[dict] = []
+    region_prices: dict[str, "pd.DataFrame"] = {}
     for region in region_list:
         agent = RegionAgent(name=region, universe="REAL", tools={"marketdata": MarketDataClient()})
         out = agent.run(as_of=as_of, top_n=top_n)
         candidates_all.append(out)
         out_path = Path(cfg.output_dir) / f"candidates_{region}_{as_of.strftime('%Y%m%d')}.json"
         write_json(out_path, out)
+        # 価格を再取得（最適化/リスク用）：エージェント内部のMarketDataと同等取得
+        mkt = MarketDataClient()
+        uni_tickers = [c["ticker"] for c in out.get("candidates", [])]
+        if uni_tickers:
+            prices, _ = mkt.get_prices(uni_tickers, lookback_days=260)
+            region_prices[region] = prices
+
+    # 価格を統合（列=ティッカー）
+    import pandas as pd  # local import to avoid global dependency at import time
+    all_prices = None
+    for p in region_prices.values():
+        if p is None or p.empty:
+            continue
+        all_prices = p if all_prices is None else all_prices.join(p, how="outer")
 
     portfolio = optimize_portfolio(
         candidates_by_region=candidates_all,
@@ -101,13 +118,20 @@ def run(
             "cash_max": cfg.cash_max,
             "as_of": as_of.strftime("%Y-%m-%d"),
         },
+        prices_df=all_prices,
     )
 
     port_path = Path(cfg.output_dir) / f"portfolio_{as_of.strftime('%Y%m%d')}.json"
     write_json(port_path, portfolio)
     print(f"✅ portfolio saved: {port_path}")
 
-    md = build_report(candidates_all=candidates_all, portfolio=portfolio, kpi={})
+    # リスク指標を計算・保存
+    risk_agent = RiskAgent()
+    risk = risk_agent.run(price_panels=region_prices, combined_prices=all_prices)
+    risk_path = Path(cfg.output_dir) / f"risk_{as_of.strftime('%Y%m%d')}.json"
+    write_json(risk_path, risk)
+
+    md = build_report(candidates_all=candidates_all, portfolio=portfolio, kpi=risk)
     out_md = Path(cfg.output_dir) / f"report_{as_of.strftime('%Y%m%d')}.md"
     write_text(out_md, md)
     print(f"✅ report saved: {out_md}")

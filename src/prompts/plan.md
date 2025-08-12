@@ -11,16 +11,16 @@
 ## タスク一覧と優先度
 
 ### P0: 最適化とリスクの本実装
-1. tools/risk_tool.py
+1. tools/risk_tool.py [Done]
    - returns_df (日次リターン) から相関行列、年率ボラ、最大ドローダウン算出
    - I/O: risk_metrics(returns_df) -> dict
-2. agents/risk.py
+2. agents/risk.py [Done]
    - 候補セット単位でリスク集計し、地域・銘柄制約の事前チェック (違反フラグ) を付与
-3. tools/optimizer_tool.py (平均分散)
+3. tools/optimizer_tool.py (平均分散) [Done]
    - 目的: 最小ボラ or 期待リターン最大 (切替)
    - 制約: 地域上限、銘柄上限、現金比率
    - 実装: scipy.optimize.minimize で重み最適化
-4. agents/optimizer.py 改修
+4. agents/optimizer.py 改修 [Done]
    - 現行の等配から、tools/optimizer_tool.py を呼ぶ構造に変更
 
 ### P0: データの多様化

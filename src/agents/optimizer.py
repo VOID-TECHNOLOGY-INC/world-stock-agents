@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, List
+from typing import Any, List, Optional
 
 import pandas as pd
 import numpy as np
@@ -9,7 +9,11 @@ from ..tools.optimizer_tool import MVConfig, optimize_mean_variance
 from ..tools.risk_tool import compute_returns
 
 
-def optimize_portfolio(candidates_by_region: list[dict], constraints: dict) -> dict:
+def optimize_portfolio(
+    candidates_by_region: list[dict],
+    constraints: dict,
+    prices_df: Optional[pd.DataFrame] = None,
+) -> dict:
     """Mean-Variance 最適化（P0）。
 
     前処理: 各地域の候補上位から対象銘柄を選定（position_limitを満たす最大数）
@@ -38,15 +42,17 @@ def optimize_portfolio(candidates_by_region: list[dict], constraints: dict) -> d
     tickers = [t for t, _ in selected]
     regions = [r for _, r in selected]
 
-    # 簡易に returns を合成するため、銘柄ごとにダミー系列を生成（将来: 実価格から推定）
-    # ここでは安定動作のためランダムウォーク近似を用いる（将来、価格パイプを受け取る構造に変更）
-    rng = np.random.default_rng(0)
-    T = 252
-    prices = pd.DataFrame(index=pd.RangeIndex(T))
-    for t in tickers:
-        rets = rng.normal(0.0003, 0.01, T)
-        prices[t] = 100 * (1 + pd.Series(rets)).cumprod()
-    rets = prices.pct_change().dropna()
+    if prices_df is None or prices_df.empty:
+        # 合成価格（フォールバック）
+        rng = np.random.default_rng(0)
+        T = 252
+        prices = pd.DataFrame(index=pd.RangeIndex(T))
+        for t in tickers:
+            rets = rng.normal(0.0003, 0.01, T)
+            prices[t] = 100 * (1 + pd.Series(rets)).cumprod()
+        rets = prices.pct_change().dropna()
+    else:
+        rets = prices_df[tickers].pct_change().dropna()
 
     mu = rets.mean() * 252
     cov = rets.cov() * 252
