@@ -19,3 +19,5 @@ logs/
 .ipynb_checkpoints/
 .vscode/
 
+._*
+.DS_Store
