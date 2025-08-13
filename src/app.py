@@ -48,6 +48,18 @@ def candidates(
         out_path = Path(cfg.output_dir) / f"candidates_{region}_{as_of.strftime('%Y%m%d')}.json"
         write_json(out_path, out)
         print(f"✅ candidates saved: {out_path}")
+        # 成長候補を別ファイルに保存
+        growth_out_path = Path(cfg.output_dir) / f"growth_{region}_{as_of.strftime('%Y%m%d')}.json"
+        write_json(
+            growth_out_path,
+            {
+                "region": region,
+                "as_of": as_of.strftime("%Y-%m-%d"),
+                "universe": out.get("universe", "REAL"),
+                "candidates": out.get("growth_candidates", []),
+            },
+        )
+        print(f"✅ growth saved: {growth_out_path}")
 
     print("done.")
 
@@ -95,6 +107,18 @@ def run(
         out_path = Path(cfg.output_dir) / f"candidates_{region}_{as_of.strftime('%Y%m%d')}.json"
         write_json(out_path, out)
         # 価格を再取得（最適化/リスク用）：エージェント内部のMarketDataと同等取得
+        # 成長候補を別ファイルに保存
+        growth_out_path = Path(cfg.output_dir) / f"growth_{region}_{as_of.strftime('%Y%m%d')}.json"
+        write_json(
+            growth_out_path,
+            {
+                "region": region,
+                "as_of": as_of.strftime("%Y-%m-%d"),
+                "universe": out.get("universe", "REAL"),
+                "candidates": out.get("growth_candidates", []),
+            },
+        )
+        print(f"✅ growth saved: {growth_out_path}")
         mkt = MarketDataClient()
         uni_tickers = [c["ticker"] for c in out.get("candidates", [])]
         if uni_tickers:
