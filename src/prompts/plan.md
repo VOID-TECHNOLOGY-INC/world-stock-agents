@@ -46,6 +46,20 @@
 2. tools/report.py (将来)
    - md → pdf 変換の実装ポイント
 
+### P1: 最適化機能の拡張（improvement-1）
+1. tools/optimizer_tool.py
+   - `MVConfig` に `risk_aversion`, `target_vol`, `target` を追加
+   - 目的関数にリスク許容度（var − λ·ret）と `target_vol` のボラ上限制約を実装
+   - 地域上限制約は明示的な不等式制約で実装（既存対応済み）
+2. agents/optimizer.py
+   - `constraints` から各パラメータを受け渡し
+3. app.py (`run`)
+   - `--risk-aversion`, `--target-vol`, `--target` オプション追加
+4. tests
+   - リスク許容度による期待リターンの増加確認
+   - `target_vol` 上限制約の遵守・到達不能時の挙動
+   - 統合テスト（optimize_portfolio レベル）
+
 ### P2: 品質と運用
 1. tests/ (unit / integration) [強化]
    - 追加カバレッジ（feedback-2.mdより）
