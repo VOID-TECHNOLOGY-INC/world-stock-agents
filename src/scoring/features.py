@@ -110,11 +110,59 @@ def merge_news_signal(features_df: pd.DataFrame, news_items: list[dict]) -> pd.D
     if not news_items:
         return features_df
     df = features_df.copy()
-    # MVP: チケットごとの件数を単純に0..1にスケール
+    # MVP拡張: タイトルから簡易感情スコアを算出し、利用可能ならそれを使用。
+    # それ以外は従来の件数スケールにフォールバック。
     import pandas as pd
     news_df = pd.DataFrame(news_items)
     if "ticker" not in news_df.columns:
         return df
+
+    def _title_sentiment(title: str) -> float:
+        # 非依存・軽量な辞書ベース感情（英語中心）。[-1,1]
+        if not isinstance(title, str) or not title:
+            return 0.0
+        t = title.lower()
+        pos_words = {
+            "beat", "beats", "beat estimates", "surge", "rally", "jump", "record",
+            "raise", "raises", "upgrade", "upgraded", "outperform", "strong",
+            "growth", "accelerate", "accelerates", "expand", "expands",
+        }
+        neg_words = {
+            "miss", "misses", "miss estimates", "slump", "plunge", "drop", "falls", "fall",
+            "cut", "cuts", "downgrade", "downgraded", "underperform", "weak", "lawsuit",
+        }
+        score = 0
+        for w in pos_words:
+            if w in t:
+                score += 1
+        for w in neg_words:
+            if w in t:
+                score -= 1
+        if score == 0:
+            return 0.0
+        # クリップし [-1,1]
+        if score > 0:
+            return min(1.0, float(score) / 3.0)
+        return max(-1.0, float(score) / 3.0)
+
+    use_sentiment = False
+    if "title" in news_df.columns:
+        try:
+            news_df["_sent"] = news_df["title"].map(_title_sentiment)
+            if (news_df["_sent"].abs() > 1e-9).any():
+                use_sentiment = True
+        except Exception:
+            use_sentiment = False
+
+    if use_sentiment:
+        sent = news_df.groupby("ticker")["_sent"].mean().rename("_news_sent").reset_index()
+        df = df.merge(sent, on="ticker", how="left")
+        # [-1,1] -> [0,1]
+        df["news_signal"] = ((df["_news_sent"].fillna(0.0) + 1.0) / 2.0).clip(0.0, 1.0)
+        df.drop(columns=[c for c in ["_news_sent"] if c in df.columns], inplace=True)
+        return df
+
+    # フォールバック: 件数で0..1スケール
     counts = news_df.groupby("ticker").size().rename("news_count").reset_index()
     df = df.merge(counts, on="ticker", how="left")
     maxc = df["news_count"].max()
