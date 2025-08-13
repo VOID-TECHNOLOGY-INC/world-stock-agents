@@ -90,6 +90,9 @@ def run(
     run_date: str = typer.Option(datetime.today().strftime("%Y-%m-%d"), "--date"),
     output: str = typer.Option("./artifacts", help="出力先ディレクトリ"),
     top_n: int = typer.Option(50, help="各地域の上位候補数"),
+    risk_aversion: float = typer.Option(0.0, help="リスク許容度（大きいほどリターン重視）。0でボラ最小。"),
+    target_vol: float = typer.Option(None, help="年率ボラ上限（例: 0.18）。未指定で制約なし。"),
+    target: str = typer.Option("min_vol", help="目的関数: min_vol / max_return（risk_aversion>0 ならトレードオフ）。"),
 ):
     """週次エンドツーエンド実行。候補→最適化→レポ出力。"""
     as_of = _parse_date(run_date)
@@ -146,6 +149,9 @@ def run(
             "cash_min": cfg.cash_min,
             "cash_max": cfg.cash_max,
             "as_of": as_of.strftime("%Y-%m-%d"),
+            "risk_aversion": risk_aversion,
+            "target_vol": target_vol,
+            "target": target,
         },
         prices_df=all_prices,
     )
