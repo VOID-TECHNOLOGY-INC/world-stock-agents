@@ -45,28 +45,34 @@ def optimize_mean_variance(
     # 投資比率の下限・上限: sum(w) ∈ [1 - cash_max, 1 - cash_min]
     invest_min = 1.0 - float(cfg.cash_bounds[1])
     invest_max = 1.0 - float(cfg.cash_bounds[0])
-    # 実現可能性: 銘柄上限から投資できる最大合計を下限が超えないように補正
+    # 実現可能性: 銘柄上限と地域上限から投資できる最大合計を下限が超えないように補正
     max_capacity = n * cfg.position_limit
-    effective_invest_min = min(invest_min, max_capacity)
+    region_limits = cfg.region_limits or {}
+    unique_regions = sorted(set(regions))
+    region_to_idx = {r: [i for i, rr in enumerate(regions) if rr == r] for r in unique_regions}
+    # 地域ごとの最大投資可能量（銘柄上限×件数と地域上限の小さい方）を合算
+    max_by_regions = 0.0
+    for r, idx in region_to_idx.items():
+        cap_r = float(region_limits.get(r, 1.0))
+        max_by_regions += float(min(cap_r, len(idx) * cfg.position_limit))
+    effective_invest_min = min(invest_min, max_capacity, max_by_regions)
+
     constraints = [
         {"type": "ineq", "fun": lambda w, invest_max=invest_max: invest_max - np.sum(w)},  # sum(w) <= invest_max
         {"type": "ineq", "fun": lambda w, invest_min=effective_invest_min: np.sum(w) - invest_min},  # sum(w) >= invest_min (補正後)
     ]
+    # 地域ごとの上限: sum(w[idx]) <= cap_r
+    for r, idx in region_to_idx.items():
+        cap_r = float(region_limits.get(r, 1.0))
+        constraints.append({
+            "type": "ineq",
+            "fun": (lambda w, idx=idx, cap_r=cap_r: cap_r - float(np.sum(w[idx]))),
+        })
 
-    # 地域ペナルティ（上限超過に罰則）
-    region_limits = cfg.region_limits or {}
-    unique_regions = sorted(set(regions))
-    region_to_idx = {r: [i for i, rr in enumerate(regions) if rr == r] for r in unique_regions}
-
+    # 目的関数にわずかなペナルティ（数値安定用）
     def penalized_obj(w: np.ndarray) -> float:
         base = obj(w)
-        pen = 0.0
-        for r, idx in region_to_idx.items():
-            cap = float(region_limits.get(r, 1.0))
-            s = float(np.sum(w[idx]))
-            if s > cap:
-                pen += 1e3 * (s - cap) ** 2
-        return base + pen
+        return base
 
     res = minimize(
         penalized_obj, x0, method="SLSQP", bounds=bounds, constraints=constraints, options={"maxiter": 500}
@@ -76,11 +82,9 @@ def optimize_mean_variance(
     # 目的上はsum(w)が範囲内になるはずだが、念のためクリップ
     total = float(np.sum(w))
     if total > invest_max + 1e-9:
+        # 収縮は地域制約を壊さない
         w = w * (invest_max / total)
-    if total < effective_invest_min - 1e-9 and total > 1e-12:
-        scale = effective_invest_min / total
-        # スケールにより上限超過が起きないようクリップ
-        w = np.minimum(w * scale, cfg.position_limit)
+    # 総投資の下限方向には後処理で拡大しない（地域上限を壊しうるため）
     return w
 
 
