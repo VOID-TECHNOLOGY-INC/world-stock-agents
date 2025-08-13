@@ -48,8 +48,18 @@
 
 ### P2: 品質と運用
 1. tests/ (unit / integration) [強化]
-   - 特徴量、正規化、スコア、制約チェック、最適化に加え、
-   - fundamentals/news のマージ仕様（上書き/スケール）テストを追加
+   - 追加カバレッジ（feedback-2.mdより）
+     - RegionAgent.run: 実データ経路/フォールバック/OpenAI未設定時の安定性
+     - Optimizer.optimize_portfolio: 選抜/フォールバック/現金整合性
+     - RiskAgent.run: パネル結合/空入力時の空メトリクス
+     - marketdata.get_prices: MultiIndex/単一/欠落補完/期間フィルタ
+     - risk_tool.compute_returns: log方式テスト
+     - optimizer_tool: 地域ペナルティ動作テスト
+     - news.NewsClient: yfinance import失敗時フォールバック
+     - build_features_from_prices: mom1/3/6/12、出来高比、NaN境界
+     - ScoreWeights: growth重み>0時のscore_overall変動
+     - chair.build_report: use_ai=True 経路、画像保存ユーティリティ
+     - I/O・設定・CLI: loaders/writers/config、Typer CLIのE2E（CliRunner）
 2. ロギング/監査
    - logs/{YYYYMMDD}/... に外部取得の source, timestamp, request-id を保存
 3. GitHub Actions
