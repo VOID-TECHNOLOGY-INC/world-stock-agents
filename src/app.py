@@ -15,6 +15,7 @@ from .agents.chair import build_report
 from .agents.optimizer import optimize_portfolio
 from .tools.marketdata import MarketDataClient
 from .agents.risk import RiskAgent
+from .agents.macro import MacroAgent
 from .tools.risk_tool import compute_returns
 
 
@@ -98,6 +99,10 @@ def run(
     region_list = [r.strip().upper() for r in regions.split(",") if r.strip()]
     print(f"[bold]Run weekly[/bold] regions={region_list} date={as_of}")
 
+    # macro: 地域初期重み（参考）
+    macro_agent = MacroAgent()
+    macro_weights = macro_agent.propose(region_list)
+
     candidates_all: List[dict] = []
     region_prices: dict[str, "pd.DataFrame"] = {}
     for region in region_list:
@@ -155,7 +160,21 @@ def run(
     risk_path = Path(cfg.output_dir) / f"risk_{as_of.strftime('%Y%m%d')}.json"
     write_json(risk_path, risk)
 
-    md = build_report(candidates_all=candidates_all, portfolio=portfolio, kpi=risk)
+    # 図の保存（相関ヒートマップ、配分円グラフ）
+    images = {}
+    try:
+        from .agents.chair import save_correlation_heatmap, save_allocation_pie
+        corr_dict = (risk or {}).get("metrics", {}).get("correlation")
+        corr_png = Path(cfg.output_dir) / f"corr_{as_of.strftime('%Y%m%d')}.png"
+        save_correlation_heatmap(corr_dict, str(corr_png))
+        images["correlation_heatmap"] = str(corr_png)
+        pie_png = Path(cfg.output_dir) / f"alloc_{as_of.strftime('%Y%m%d')}.png"
+        save_allocation_pie(portfolio, str(pie_png))
+        images["allocation_pie"] = str(pie_png)
+    except Exception:
+        images = {}
+
+    md = build_report(candidates_all=candidates_all, portfolio=portfolio, kpi=risk, macro=macro_weights, images=images)
     out_md = Path(cfg.output_dir) / f"report_{as_of.strftime('%Y%m%d')}.md"
     write_text(out_md, md)
     print(f"✅ report saved: {out_md}")
