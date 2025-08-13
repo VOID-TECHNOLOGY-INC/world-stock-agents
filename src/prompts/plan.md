@@ -24,14 +24,14 @@
    - 現行の等配から、tools/optimizer_tool.py を呼ぶ構造に変更
 
 ### P0: データの多様化
-1. tools/fundamentals.py
-   - yfinance/yahooquery 等で ROIC / FCF/売上 / 売上CAGR / EPS成長 / NetDebt-EBITDA を取得
-   - 欠損はNaNで保持し、正規化時にロバスト処理
-2. tools/news.py
-   - Yahoo Finance / RSS 等からタイトル / URL / 日付 / ティッカーを収集
-   - 直近30/90日のポジ/ネガ件数を集計 → news_signal に反映
-3. scoring/features.py 拡張
-   - ファンダ・ニュース指標を取り込み、score_* を更新
+1. tools/fundamentals.py [MVP Done]
+   - yfinance により ROIC / FCF margin / 売上CAGR / EPS成長 / NetDebt/EBITDA の計算を実装済み
+   - 欠損はNaNで保持し、正規化でロバスト処理
+2. tools/news.py [MVP Done]
+   - yfinance `Ticker.news` 経由で タイトル / URL / 日付 / ティッカー を収集（since 以降をフィルタ）
+   - 当面は件数の強度のみを `news_signal` に反映（感情はP1）
+3. scoring/features.py 拡張 [MVP Done]
+   - `merge_fundamentals` と `merge_news_signal` を実装、normalize→score 合成に反映
 
 ### P1: マクロ・配分
 1. agents/macro.py
@@ -47,8 +47,9 @@
    - md → pdf 変換の実装ポイント
 
 ### P2: 品質と運用
-1. tests/ (unit / integration)
-   - 特徴量、正規化、スコア、制約チェック、最適化の検証
+1. tests/ (unit / integration) [強化]
+   - 特徴量、正規化、スコア、制約チェック、最適化に加え、
+   - fundamentals/news のマージ仕様（上書き/スケール）テストを追加
 2. ロギング/監査
    - logs/{YYYYMMDD}/... に外部取得の source, timestamp, request-id を保存
 3. GitHub Actions
@@ -72,6 +73,6 @@
 - 市場休日・時系列欠損: 左結合 + 前方埋め
 
 ## スケジュール (目安)
-- Week2 前半: リスク・最適化、ニュースツール
-- Week2 後半: ファンダツール、スコア統合、レポ強化
+- Week2 前半: リスク・最適化、ニュースツール（yfinance.news）
+- Week2 後半: ファンダツール/スコア統合の安定化、レポ強化
 - Week3: マクロ、PDF、テスト・CI

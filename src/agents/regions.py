@@ -43,7 +43,9 @@ class RegionAgent:
                 fcli = self.tools.get("fundamentals") if self.tools else None
                 if not isinstance(fcli, FundamentalsClient):
                     fcli = FundamentalsClient()
-                fdf = fcli.get_fundamentals(uni["ticker"].tolist(), ["roic", "fcf_margin"])  # MVP
+                fdf = fcli.get_fundamentals(
+                    uni["ticker"].tolist(), ["roic", "fcf_margin", "revenue_cagr", "eps_growth"]
+                )  # 成長も取得
                 df_features = merge_fundamentals(df_features, fdf)
                 # ニュース
                 ncli = self.tools.get("news") if self.tools else None
@@ -60,56 +62,60 @@ class RegionAgent:
         df_scored = score_candidates(df_features, ScoreWeights())
 
         df_top = (
-            df_scored.sort_values("score_overall", ascending=False)
-            .head(top_n)
-            .copy()
+            df_scored.sort_values("score_overall", ascending=False).head(top_n).copy()
         )
 
-        candidates: list[dict[str, Any]] = []
-        rng = np.random.default_rng(42)
-        for _, row in df_top.iterrows():
-            ticker = row["ticker"]
-            name = row["name"]
-            evidence = [
-                {"type": "metric", "name": "ROIC_TTM", "value": round(10 + 20 * rng.random(), 2)},
-            ]
-            # OpenAIでthesis/risks生成（可能なら）
-            features = {
-                "fundamental": float(row.get("score_fundamental", 0.0)),
-                "technical": float(row.get("score_technical", 0.0)),
-                "quality": float(row.get("score_quality", 0.0)),
-                "news": float(row.get("score_news", 0.0)),
-            }
-            if is_openai_configured():
-                thesis, risks = generate_thesis_and_risks(ticker, name, self.name, features)
-            else:
-                thesis, risks = (
-                    f"{name} は{self.name}市場の中で相対的に指標が良好。",
-                    ["需給変動", "規制", "マクロ要因"],
-                )
+        # 成長上位（別出力用）
+        df_growth_top = (
+            df_scored.sort_values("score_growth", ascending=False).head(top_n).copy()
+        )
 
-            candidates.append(
-                {
-                    "ticker": ticker,
-                    "name": name,
-                    "score_overall": float(row["score_overall"]),
-                    "score_breakdown": {
-                        "fundamental": float(row.get("score_fundamental", 0.0)),
-                        "technical": float(row.get("score_technical", 0.0)),
-                        "quality": float(row.get("score_quality", 0.0)),
-                        "news": float(row.get("score_news", 0.0)),
-                    },
-                    "thesis": thesis,
-                    "risks": risks,
-                    "evidence": evidence,
+        def _rows_to_candidates(rows: "pd.DataFrame") -> list[dict[str, Any]]:
+            out: list[dict[str, Any]] = []
+            rng = np.random.default_rng(42)
+            for _, row in rows.iterrows():
+                ticker = row["ticker"]
+                name = row["name"]
+                evidence = [
+                    {"type": "metric", "name": "ROIC_TTM", "value": round(10 + 20 * rng.random(), 2)},
+                ]
+                features = {
+                    "fundamental": float(row.get("score_fundamental", 0.0)),
+                    "technical": float(row.get("score_technical", 0.0)),
+                    "quality": float(row.get("score_quality", 0.0)),
+                    "news": float(row.get("score_news", 0.0)),
+                    "growth": float(row.get("score_growth", 0.0)),
                 }
-            )
+                if is_openai_configured():
+                    thesis, risks = generate_thesis_and_risks(ticker, name, self.name, features)
+                else:
+                    thesis, risks = (
+                        f"{name} は{self.name}市場の中で相対的に指標が良好。",
+                        ["需給変動", "規制", "マクロ要因"],
+                    )
+
+                out.append(
+                    {
+                        "ticker": ticker,
+                        "name": name,
+                        "score_overall": float(row.get("score_overall", 0.0)),
+                        "score_breakdown": features,
+                        "thesis": thesis,
+                        "risks": risks,
+                        "evidence": evidence,
+                    }
+                )
+            return out
+
+        candidates = _rows_to_candidates(df_top)
+        growth_candidates = _rows_to_candidates(df_growth_top)
 
         result = {
             "region": self.name,
             "as_of": as_of.strftime("%Y-%m-%d"),
             "universe": self.universe,
             "candidates": candidates,
+            "growth_candidates": growth_candidates,
         }
 
         return result
