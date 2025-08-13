@@ -14,6 +14,16 @@ class MVConfig:
     region_limits: Dict[str, float] | None = None
     position_limit: float = 0.07
     cash_bounds: Tuple[float, float] = (0.0, 0.1)
+    risk_aversion: float = 0.0  # 0→ボラ最小、値を上げるとリターン重視
+    target_vol: float | None = None  # 年率ボラ上限（例: 0.18）。未指定なら制約なし
+
+    def __post_init__(self) -> None:
+        if self.risk_aversion < 0:
+            raise ValueError("risk_aversion must be non-negative")
+        if self.target_vol is not None and self.target_vol <= 0:
+            raise ValueError("target_vol must be positive")
+        if self.target not in ("min_vol", "max_return"):
+            raise ValueError("target must be 'min_vol' or 'max_return'")
 
 
 def _apply_region_constraints(tickers: List[str], regions: List[str], region_limits: Dict[str, float]) -> List[Tuple[int, float]]:
@@ -37,9 +47,16 @@ def optimize_mean_variance(
     # 目的関数
     def obj(w: np.ndarray) -> float:
         var = float(np.dot(w, cov.values @ w))
-        if cfg.target == "max_return" and mu is not None:
+        ret = 0.0
+        if mu is not None:
             ret = float(np.dot(w, mu.loc[tickers].fillna(0.0).values))
-            return var - 1.0 * ret  # 簡易: リスクとリターンのトレードオフ
+        # リスク許容度が指定されていればトレードオフ優先
+        if cfg.risk_aversion > 0 and mu is not None:
+            return var - float(cfg.risk_aversion) * ret
+        # それ以外でmax_returnが指定されていれば純粋な最大化
+        if cfg.target == "max_return" and mu is not None:
+            return -ret
+        # デフォルトは最小分散
         return var
 
     # 投資比率の下限・上限: sum(w) ∈ [1 - cash_max, 1 - cash_min]
@@ -61,6 +78,13 @@ def optimize_mean_variance(
         {"type": "ineq", "fun": lambda w, invest_max=invest_max: invest_max - np.sum(w)},  # sum(w) <= invest_max
         {"type": "ineq", "fun": lambda w, invest_min=effective_invest_min: np.sum(w) - invest_min},  # sum(w) >= invest_min (補正後)
     ]
+    # 年率ボラ上限（target_vol）: w' Σ w <= target_vol^2
+    if cfg.target_vol is not None:
+        var_cap = float(cfg.target_vol) ** 2
+        constraints.append({
+            "type": "ineq",
+            "fun": (lambda w, var_cap=var_cap: var_cap - float(np.dot(w, cov.values @ w))),
+        })
     # 地域ごとの上限: sum(w[idx]) <= cap_r
     for r, idx in region_to_idx.items():
         cap_r = float(region_limits.get(r, 1.0))
@@ -71,8 +95,8 @@ def optimize_mean_variance(
 
     # 目的関数にわずかなペナルティ（数値安定用）
     def penalized_obj(w: np.ndarray) -> float:
-        base = obj(w)
-        return base
+        # 目的関数はobjのみ（地域上限は明示制約にて対応）
+        return obj(w)
 
     res = minimize(
         penalized_obj, x0, method="SLSQP", bounds=bounds, constraints=constraints, options={"maxiter": 500}

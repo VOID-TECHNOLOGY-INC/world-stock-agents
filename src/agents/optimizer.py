@@ -58,10 +58,12 @@ def optimize_portfolio(
     cov = rets.cov() * 252
 
     cfg = MVConfig(
-        target="min_vol",
+        target=constraints.get("target", "min_vol"),
         region_limits=region_limits,
         position_limit=position_limit,
         cash_bounds=(constraints.get("cash_min", 0.0), constraints.get("cash_max", 0.1)),
+        risk_aversion=float(constraints.get("risk_aversion", 0.0)),
+        target_vol=(float(constraints["target_vol"]) if constraints.get("target_vol") is not None else None),
     )
     w = optimize_mean_variance(tickers, regions, mu, cov, cfg)
 
