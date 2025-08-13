@@ -14,6 +14,11 @@ def test_cli_run_generates_artifacts(tmp_path, monkeypatch):
     # RegionAgent 内部のMarketDataClientが実データに触れないように環境を固定
     os.environ.pop("OPENAI_API_KEY", None)
 
+    # マクロCSV（テスト用）を用意
+    import pandas as pd
+    outdir.mkdir(parents=True, exist_ok=True)
+    pd.DataFrame({"region": ["JP"], "weight": [1.0]}).to_csv(outdir / "macro.csv", index=False)
+
     result = runner.invoke(
         app,
         [
@@ -26,6 +31,8 @@ def test_cli_run_generates_artifacts(tmp_path, monkeypatch):
             str(outdir),
             "--top-n",
             "10",
+            "--macro-csv",
+            str(outdir / "macro.csv"),
         ],
         catch_exceptions=False,
     )

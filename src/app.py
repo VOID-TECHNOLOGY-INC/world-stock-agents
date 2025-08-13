@@ -93,6 +93,7 @@ def run(
     risk_aversion: float = typer.Option(0.0, help="リスク許容度（大きいほどリターン重視）。0でボラ最小。"),
     target_vol: float = typer.Option(None, help="年率ボラ上限（例: 0.18）。未指定で制約なし。"),
     target: str = typer.Option("min_vol", help="目的関数: min_vol / max_return（risk_aversion>0 ならトレードオフ）。"),
+    macro_csv: str = typer.Option(None, help="マクロ初期重みCSVのパス（region,weight）。未指定でデフォルト重み。"),
 ):
     """週次エンドツーエンド実行。候補→最適化→レポ出力。"""
     as_of = _parse_date(run_date)
@@ -103,7 +104,7 @@ def run(
     print(f"[bold]Run weekly[/bold] regions={region_list} date={as_of}")
 
     # macro: 地域初期重み（参考）
-    macro_agent = MacroAgent()
+    macro_agent = MacroAgent(csv_path=macro_csv)
     macro_weights = macro_agent.propose(region_list)
 
     candidates_all: List[dict] = []
