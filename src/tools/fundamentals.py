@@ -22,7 +22,11 @@ class FundamentalsClient:
         self._cache = {}  # 簡易キャッシュ
 
     def _fetch_single_ticker_with_retry(self, ticker: str) -> Optional[Dict[str, float]]:
-        """単一ティッカーの財務データ取得（リトライ付き）"""
+        """単一ティッカーの財務データ取得（リトライ付き）
+
+        一部ティッカーで一時的に空データが返ることがあるため、
+        リトライ時には短いスリープを挟み再試行する。
+        """
         import yfinance as yf
         
         for attempt in range(self.retry_attempts):
@@ -99,6 +103,12 @@ class FundamentalsClient:
                 data.setdefault("invested_capital", None)
                 data.setdefault("fcf_ttm", None)
                 
+                # 最低限いずれかのキーが入っていなければ失敗扱い
+                if not any(k in data and data[k] is not None for k in (
+                    "revenue_ttm", "eps_ttm", "ebitda_ttm", "net_debt"
+                )):
+                    raise RuntimeError("empty fundamentals")
+
                 return data
                 
             except Exception as e:

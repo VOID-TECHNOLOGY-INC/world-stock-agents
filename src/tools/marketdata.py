@@ -122,29 +122,41 @@ class MarketDataClient:
         # yfinanceは期間指定の方が速い
         period = "2y" if lookback_days > 252 else "1y"
         
-        # まずバッチダウンロードを試行
+        # まずバッチダウンロードを試行（リトライ付き）
         # 内部スレッドはOFFにし、外側の制御に委ねる
-        try:
-            data = yf.download(
-                tickers=tickers,
-                period=period,
-                interval="1d",
-                group_by="ticker",
-                auto_adjust=True,
-                threads=False,
-                progress=False,
-                ignore_tz=True
-            )
-        except TypeError:
-            data = yf.download(
-                tickers=tickers,
-                period=period,
-                interval="1d",
-                group_by="ticker",
-                auto_adjust=True,
-                threads=False,
-                progress=False
-            )
+        data = None
+        for attempt in range(self.retry_attempts):
+            try:
+                try:
+                    data = yf.download(
+                        tickers=tickers,
+                        period=period,
+                        interval="1d",
+                        group_by="ticker",
+                        auto_adjust=True,
+                        threads=False,
+                        progress=False,
+                        ignore_tz=True
+                    )
+                except TypeError:
+                    data = yf.download(
+                        tickers=tickers,
+                        period=period,
+                        interval="1d",
+                        group_by="ticker",
+                        auto_adjust=True,
+                        threads=False,
+                        progress=False
+                    )
+                break
+            except Exception as e:
+                if attempt < self.retry_attempts - 1:
+                    time.sleep(self.retry_delay * (2 ** attempt))  # 指数バックオフ
+                    continue
+                logging.warning(
+                    f"Batch download failed for {len(tickers)} tickers after {self.retry_attempts} attempts: {type(e).__name__}: {e}"
+                )
+                data = pd.DataFrame()
 
         # single vs multi ticker で形が変わる
         def extract(field: str) -> pd.DataFrame:
@@ -162,8 +174,8 @@ class MarketDataClient:
                     return pd.DataFrame({tickers[0]: data[field]})
                 return pd.DataFrame()
 
-        prices = extract("Close")
-        volumes = extract("Volume")
+        prices = extract("Close") if data is not None else pd.DataFrame()
+        volumes = extract("Volume") if data is not None else pd.DataFrame()
 
         # フィルタ: 直近 lookback_days に限定（.last の代替）
         if prices is not None and not prices.empty:

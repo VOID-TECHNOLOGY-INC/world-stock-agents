@@ -21,7 +21,11 @@ class NewsClient:
         self._cache = {}  # 簡易キャッシュ
 
     def _fetch_single_ticker_with_retry(self, ticker: str, since: date) -> List[Dict]:
-        """単一ティッカーのニュース取得（リトライ付き）"""
+        """単一ティッカーのニュース取得（リトライ付き）
+
+        yfinance 側の不安定さにより空配列が返ることがあるため、
+        一定回数は再試行する。
+        """
         items: List[Dict] = []
         
         try:
@@ -34,7 +38,8 @@ class NewsClient:
                 tk = yf.Ticker(ticker)
                 news_list = getattr(tk, "news", None)
                 if not news_list:
-                    break
+                    # 空の場合はリトライ
+                    raise RuntimeError("empty news")
                 
                 for n in news_list:
                     title = n.get("title") or n.get("headline")
