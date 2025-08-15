@@ -8,7 +8,6 @@ MC.PA,LVMH
 OR.PA,L'Oreal
 SHEL.L,Shell Plc
 AZN.L,AstraZeneca
-TM.AS,ASML Holding NV
 SIE.DE,Siemens AG
 UL,Unilever ADR
 ULVR.L,Unilever Plc
@@ -30,42 +29,33 @@ IBE.MC,Iberdrola SA
 ITX.MC,Inditex SA
 VOW3.DE,Volkswagen AG
 DBK.DE,Deutsche Bank AG
-ING.AS,ING Groep NV
 AD.AS,Ahold Delhaize NV
-RDSA.AS,Royal Dutch Shell A
 PHIA.AS,Koninklijke Philips NV
 KPN.AS,KPN NV
 VIE.PA,Veolia Environnement
 CAP.PA,Capgemini SE
 SU.PA,Schneider Electric SE
 EL.PA,EssilorLuxottica SA
-UG.PA,Peugeot SA
 CS.PA,AXA SA
 BNP.PA,BNP Paribas SA
 GLE.PA,Societe Generale SA
 DSY.PA,Dassault Systemes SE
 ML.PA,Michelin
 RNO.PA,Renault SA
-STM.PA,STMicroelectronics NV
 TEP.PA,Teleperformance SA
 SAF.PA,Safran SA
 KER.PA,Kering SA
 AI.PA,Air Liquide SA
 WLN.PA,Worldline SA
-ENI.PA,Orange SA
-EDF.PA,Electricite de France
 VIV.PA,Vivendi SA
-PUBP.PA,Publicis Groupe SA
 ATO.PA,Atos SE
 ACA.PA,Credit Agricole SA
-BIM.MC,Banco Bilbao Vizcaya Argentaria SA
 SAN.MC,Banco Santander SA
 FER.MC,Ferrovial SA
 AMS.MC,Amadeus IT Group SA
 MAP.MC,Mapfre SA
 ACS.MC,ACS Actividades de Construccion y Servicios SA
 ENG.MC,Enagas SA
-REE.MC,Red Electrica Corp SA
 MTS.MC,ArcelorMittal SA
 GLEN.L,Glencore Plc
 VOD.L,Vodafone Group Plc
@@ -73,8 +63,6 @@ BT-A.L,BT Group Plc
 LLOY.L,Lloyds Banking Group Plc
 BARC.L,Barclays Plc
 BP.L,BP Plc
-RBS.L,NatWest Group Plc
-RDSG.L,Rolls-Royce Holdings Plc
 AAL.L,Anglo American Plc
 CRH.L,CRH Plc
 DGE.L,Diageo Plc
@@ -88,17 +76,11 @@ UCG.MI,UniCredit SpA
 ISP.MI,Intesa Sanpaolo SpA
 G.MI,Assicurazioni Generali SpA
 TIT.MI,Telecom Italia SpA
-F.MI,Ferrari NV
 RACE,Ferrari NV
-STM.MI,STMicroelectronics NV
-UBI.MI,Unione di Banche Italiane SpA
 A2A.MI,A2A SpA
 SPM.MI,Saipem SpA
 PRY.MI,Prysmian SpA
 TEN.MI,Tenaris SA
-LUX.MI,Luxottica Group SpA
-FCA.MI,Fiat Chrysler Automobiles NV
-SDF.PA,Societe Des Autoroutes du Sud de la France
 VWSB.DE,Vossloh AG
 VNA.DE,Vonovia SE
 IEX,STOXX Europe 600 ETF
