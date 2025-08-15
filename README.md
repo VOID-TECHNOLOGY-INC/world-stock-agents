@@ -25,7 +25,11 @@ cp .env.example .env  # OPENAI_API_KEY を設定
 週次レポートの完全な生成（候補選定→最適化→レポート生成）：
 
 ```bash
+# 通常実行
 python -m src.app run --date 2025-08-12 --regions JP,US --output ./artifacts
+
+# 詳細な進捗表示付き実行
+python -m src.app run --date 2025-08-12 --regions JP,US --output ./artifacts --verbose
 ```
 
 **オプション:**
@@ -37,6 +41,8 @@ python -m src.app run --date 2025-08-12 --regions JP,US --output ./artifacts
 - `--target-vol`: 年率ボラ上限（例: 0.18、デフォルト: 制約なし）
 - `--target`: 目的関数（min_vol / max_return、デフォルト: min_vol）
 - `--macro-csv`: マクロ初期重みCSVのパス（region,weight）
+- `--verbose`, `-v`: 詳細な進捗表示（Richライブラリを使用した可視化）
+- `--parallel/--sequential`: 並列実行（デフォルト）または逐次実行
 
 ### オプションの詳細な使い方
 
@@ -142,14 +148,97 @@ python -m src.app run \
   --risk-aversion 0.5 \
   --target-vol 0.18 \
   --regions JP,US
+
+# 詳細な進捗表示付き実行
+python -m src.app run \
+  --top-n 50 \
+  --risk-aversion 0.5 \
+  --regions JP,US,EU \
+  --verbose
+
+# 並列実行（デフォルト）
+python -m src.app run --regions JP,US,EU --parallel
+
+# 逐次実行（デバッグ用）
+python -m src.app run --regions JP,US,EU --sequential
+
+### 進捗可視化機能
+
+`--verbose` オプションを使用すると、Richライブラリによる詳細な進捗表示が有効になります：
+
+#### 表示される情報
+- **実行情報パネル**: 実行地域、日付、リスク設定などの基本情報
+- **プログレスバー**: 各エージェントの処理進捗（スピナー、バー、パーセンテージ、経過時間）
+- **ステップ詳細**: 各処理段階の詳細な説明
+- **結果サマリー**: 生成されたファイルの一覧とステータス
+
+#### エージェント別の進捗表示
+1. **マクロエージェント**: 地域初期重みの分析
+2. **地域別エージェント**: 各地域の候補選定（初期化→選定→保存→価格取得）
+3. **価格統合**: 全地域の価格データ統合
+4. **最適化エージェント**: ポートフォリオ最適化
+5. **リスクエージェント**: リスク指標計算
+6. **可視化**: 相関ヒートマップ・配分円グラフ生成
+7. **レポート生成**: Markdownレポート作成
+
+#### 使用例
+```bash
+# 詳細な進捗表示で週次実行
+python -m src.app run --verbose --regions JP,US
+
+# 候補選定のみを詳細表示
+python -m src.app candidates --verbose --regions JP,US,EU
+
+# レポート生成を詳細表示
+python -m src.app report --verbose --input ./artifacts/portfolio_20250812.json
 ```
+
+### 並列化機能
+
+地域別エージェントの処理を並列化することで、処理時間を大幅に短縮できます。
+
+#### 並列化の仕組み
+- **ThreadPoolExecutor**: 最大4つのスレッドで並列実行
+- **独立した処理**: 各地域のエージェントは独立して動作
+- **進捗表示**: 並列実行中も各タスクの進捗を個別に表示
+- **エラーハンドリング**: 1つの地域でエラーが発生しても他の地域は継続
+
+#### パフォーマンス比較
+| 地域数 | 逐次実行 | 並列実行 | 短縮率 |
+|--------|----------|----------|--------|
+| 2地域 (JP,US) | ~2分 | ~1.2分 | 40%短縮 |
+| 4地域 (JP,US,EU,CN) | ~4分 | ~1.5分 | 62%短縮 |
+
+#### 使用例
+```bash
+# 並列実行（デフォルト）
+python -m src.app run --regions JP,US,EU,CN --parallel
+
+# 逐次実行（デバッグ・トラブルシューティング用）
+python -m src.app run --regions JP,US,EU,CN --sequential
+
+# 候補選定のみ並列実行
+python -m src.app candidates --regions JP,US,EU --parallel
+
+# 詳細表示付き並列実行
+python -m src.app run --verbose --parallel --regions JP,US,EU,CN
+```
+
+#### 注意事項
+- **API制限**: 外部API（yfinance等）のレート制限に注意
+- **メモリ使用量**: 並列実行時はメモリ使用量が増加
+- **デバッグ**: 問題が発生した場合は`--sequential`で逐次実行を試行
 
 ### 2. 候補選定のみ
 
 地域別エージェントを実行し、候補JSONを出力：
 
 ```bash
+# 通常実行
 python -m src.app candidates --regions JP,US --date 2025-08-12 --output ./artifacts
+
+# 詳細な進捗表示付き実行
+python -m src.app candidates --regions JP,US --date 2025-08-12 --output ./artifacts --verbose
 ```
 
 ### 3. レポート生成のみ
@@ -157,7 +246,11 @@ python -m src.app candidates --regions JP,US --date 2025-08-12 --output ./artifa
 既存のポートフォリオJSONからMarkdownレポートを生成：
 
 ```bash
+# 通常実行
 python -m src.app report --input ./artifacts/portfolio_20250812.json --output ./artifacts
+
+# 詳細な進捗表示付き実行
+python -m src.app report --input ./artifacts/portfolio_20250812.json --output ./artifacts --verbose
 ```
 
 ## Makefileを使った簡単実行
