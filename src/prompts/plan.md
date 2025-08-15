@@ -64,8 +64,8 @@
 1. tests/ (unit / integration) [強化 - テスト駆動開発で実装中]
    - 追加カバレッジ（feedback-2.mdより）
      - RegionAgent.run: 実データ経路/フォールバック/OpenAI未設定時の安定性 [Done]
-     - Optimizer.optimize_portfolio: 選抜/フォールバック/現金整合性 [In Progress]
-     - RiskAgent.run: パネル結合/空入力時の空メトリクス [In Progress]
+     - Optimizer.optimize_portfolio: 選抜/フォールバック/現金整合性 [Done]
+     - RiskAgent.run: パネル結合/空入力時の空メトリクス [Done]
      - marketdata.get_prices: MultiIndex/単一/欠落補完/期間フィルタ [In Progress]
      - risk_tool.compute_returns: log方式テスト [In Progress]
      - optimizer_tool: 地域ペナルティ動作テスト [In Progress]
