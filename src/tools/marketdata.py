@@ -21,10 +21,11 @@ class MarketDataClient:
       - cols: ティッカー
     """
     
-    def __init__(self, max_workers: int = 4, retry_attempts: int = 3, retry_delay: float = 1.0, global_limit: int = 6):
-        self.max_workers = max_workers
+    def __init__(self, max_workers: int = 1, retry_attempts: int = 3, retry_delay: float = 1.0, global_limit: int = 6, request_interval: float = 0.5):
+        self.max_workers = max_workers  # レート制限対策でデフォルト1に変更
         self.retry_attempts = retry_attempts
         self.retry_delay = retry_delay
+        self.request_interval = request_interval  # リクエスト間隔（秒）
         self._cache = {}  # 簡易キャッシュ（同日内の同一ティッカー取得を再利用）
         # ランタイム全体の同時ダウンロード制限（プロセス内共有）
         # NOTE: インスタンス間で共有したいが、簡便にインスタンスごとに上限を設ける
@@ -64,6 +65,9 @@ class MarketDataClient:
                     cutoff = (datetime.utcnow() - timedelta(days=lookback_days)).date()
                     cp = cp.loc[cp.index.date >= cutoff]
                     cv = cv.loc[cv.index.date >= cutoff]
+                    
+                    # 成功時はリクエスト間隔を設ける（レート制限対策）
+                    time.sleep(self.request_interval)
                     return cp, cv
                 # 空返却は失敗扱いとしてリトライ
                 continue
@@ -122,29 +126,41 @@ class MarketDataClient:
         # yfinanceは期間指定の方が速い
         period = "2y" if lookback_days > 252 else "1y"
         
-        # まずバッチダウンロードを試行
+        # まずバッチダウンロードを試行（リトライ付き）
         # 内部スレッドはOFFにし、外側の制御に委ねる
-        try:
-            data = yf.download(
-                tickers=tickers,
-                period=period,
-                interval="1d",
-                group_by="ticker",
-                auto_adjust=True,
-                threads=False,
-                progress=False,
-                ignore_tz=True
-            )
-        except TypeError:
-            data = yf.download(
-                tickers=tickers,
-                period=period,
-                interval="1d",
-                group_by="ticker",
-                auto_adjust=True,
-                threads=False,
-                progress=False
-            )
+        data = None
+        for attempt in range(self.retry_attempts):
+            try:
+                try:
+                    data = yf.download(
+                        tickers=tickers,
+                        period=period,
+                        interval="1d",
+                        group_by="ticker",
+                        auto_adjust=True,
+                        threads=False,
+                        progress=False,
+                        ignore_tz=True
+                    )
+                except TypeError:
+                    data = yf.download(
+                        tickers=tickers,
+                        period=period,
+                        interval="1d",
+                        group_by="ticker",
+                        auto_adjust=True,
+                        threads=False,
+                        progress=False
+                    )
+                break
+            except Exception as e:
+                if attempt < self.retry_attempts - 1:
+                    time.sleep(self.retry_delay * (2 ** attempt))  # 指数バックオフ
+                    continue
+                logging.warning(
+                    f"Batch download failed for {len(tickers)} tickers after {self.retry_attempts} attempts: {type(e).__name__}: {e}"
+                )
+                data = pd.DataFrame()
 
         # single vs multi ticker で形が変わる
         def extract(field: str) -> pd.DataFrame:
@@ -162,8 +178,8 @@ class MarketDataClient:
                     return pd.DataFrame({tickers[0]: data[field]})
                 return pd.DataFrame()
 
-        prices = extract("Close")
-        volumes = extract("Volume")
+        prices = extract("Close") if data is not None else pd.DataFrame()
+        volumes = extract("Volume") if data is not None else pd.DataFrame()
 
         # フィルタ: 直近 lookback_days に限定（.last の代替）
         if prices is not None and not prices.empty:
@@ -176,14 +192,19 @@ class MarketDataClient:
         # 欠落ティッカーの並列補完
         missing = [t for t in tickers if prices is None or t not in prices.columns]
         if missing:
-            # バッチサイズを制御（20-50銘柄ずつ）
-            batch_size = min(30, len(missing))
+            # バッチサイズを制御（レート制限対策）
+            batch_size = min(10, len(missing))  # バッチサイズを小さく
             missing_batches = [missing[i:i + batch_size] for i in range(0, len(missing), batch_size)]
             
             frames_p = [] if prices is None or prices.empty else [prices]
             frames_v = [] if volumes is None or volumes.empty else [volumes]
             
-            for batch in missing_batches:
+            for batch_idx, batch in enumerate(missing_batches):
+                if batch_idx > 0:
+                    # バッチ間隔を設ける（レート制限対策）
+                    time.sleep(2.0)
+                    logging.info(f"Processing missing tickers batch {batch_idx + 1}/{len(missing_batches)}")
+                
                 batch_prices, batch_volumes = self._download_batch_tickers(batch, period, lookback_days)
                 if not batch_prices.empty:
                     frames_p.append(batch_prices)
