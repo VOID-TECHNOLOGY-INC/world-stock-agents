@@ -2,7 +2,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import date
-from typing import List, Dict
+from typing import List, Dict, Optional
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import time
+import logging
 
 
 @dataclass
@@ -10,24 +13,29 @@ class NewsClient:
     """ニュース取得の薄いIF。MVPはモック/将来はRSS/API連携。
     戻り値: list[dict(ticker,title,url,date)]
     """
+    
+    def __init__(self, max_workers: int = 3, retry_attempts: int = 2, retry_delay: float = 0.5):
+        self.max_workers = max_workers  # レート制限を考慮して控えめに
+        self.retry_attempts = retry_attempts
+        self.retry_delay = retry_delay
+        self._cache = {}  # 簡易キャッシュ
 
-    def _fetch(self, tickers: List[str], since: date) -> List[Dict]:
-        # MVP実装: yfinance.Ticker.news を使用し、ティッカーごとのニュースを取得。
-        # - ネットワーク失敗や未対応環境でも安全に動作するようにtry/exceptで保護
-        # - since 以降の日付のニュースのみ返却
-        # - 戻り値は {ticker,title,url,date}（dateはYYYY-MM-DDのISO文字列）
+    def _fetch_single_ticker_with_retry(self, ticker: str, since: date) -> List[Dict]:
+        """単一ティッカーのニュース取得（リトライ付き）"""
         items: List[Dict] = []
+        
         try:
             import yfinance as yf  # optional dependency at runtime
         except Exception:
             return items
 
-        for t in tickers or []:
+        for attempt in range(self.retry_attempts):
             try:
-                tk = yf.Ticker(t)
+                tk = yf.Ticker(ticker)
                 news_list = getattr(tk, "news", None)
                 if not news_list:
-                    continue
+                    break
+                
                 for n in news_list:
                     title = n.get("title") or n.get("headline")
                     url = n.get("link") or n.get("url")
@@ -60,15 +68,58 @@ class NewsClient:
 
                     if title and url:
                         items.append({
-                            "ticker": t,
+                            "ticker": ticker,
                             "title": title,
                             "url": url,
                             "date": dt_str,
                         })
-            except Exception:
-                # 個別ティッカー失敗は無視
-                continue
+                
+                # 成功したらループを抜ける
+                break
+                
+            except Exception as e:
+                if attempt < self.retry_attempts - 1:
+                    time.sleep(self.retry_delay * (2 ** attempt))  # 指数バックオフ
+                    continue
+                logging.warning(f"Failed to fetch news for {ticker} after {self.retry_attempts} attempts: {e}")
+                break
 
+        return items
+
+    def _fetch(self, tickers: List[str], since: date) -> List[Dict]:
+        # キャッシュチェック
+        cache_key = f"{','.join(sorted(tickers))}_{since.isoformat()}"
+        today = date.today()
+        if cache_key in self._cache and self._cache[cache_key]['date'] == today:
+            return self._cache[cache_key]['items']
+        
+        items: List[Dict] = []
+        
+        if not tickers:
+            return items
+        
+        # 並列でニュース取得
+        with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
+            future_to_ticker = {
+                executor.submit(self._fetch_single_ticker_with_retry, t, since): t 
+                for t in tickers
+            }
+            
+            for future in as_completed(future_to_ticker):
+                ticker = future_to_ticker[future]
+                try:
+                    ticker_items = future.result()
+                    items.extend(ticker_items)
+                except Exception as e:
+                    logging.warning(f"Error fetching news for {ticker}: {e}")
+                    continue
+        
+        # キャッシュに保存
+        self._cache[cache_key] = {
+            'date': today,
+            'items': items
+        }
+        
         return items
 
     def get_news(self, tickers: List[str], since: date) -> List[Dict]:
