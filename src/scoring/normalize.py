@@ -40,7 +40,7 @@ def normalize_growth_rate(rate: float) -> float:
 def normalize_features(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
     for col in df.columns:
-        if col in ("ticker", "name"):
+        if col in ("ticker", "name", "_raw_technical"):
             continue
         df[col] = _min_max(df[col])
     return df

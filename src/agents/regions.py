@@ -94,8 +94,20 @@ class RegionAgent:
                     "overall": float(row.get("score_growth", 0.0)),
                 }
                 
+                # 生のテクニカル指標を準備（LLM分析用）
+                raw_technical = row.get("_raw_technical", {})
+                technical_indicators = {}
+                if raw_technical:
+                    for k, v in raw_technical.items():
+                        if v is not None and not pd.isna(v):
+                            technical_indicators[k] = float(v)
+                        else:
+                            technical_indicators[k] = None
+                
                 if is_openai_configured():
-                    thesis, risks = generate_thesis_and_risks(ticker, name, self.name, features)
+                    thesis, risks = generate_thesis_and_risks(
+                        ticker, name, self.name, features, technical_indicators
+                    )
                 else:
                     thesis, risks = (
                         f"{name} は{self.name}市場の中で相対的に指標が良好。",
@@ -109,6 +121,7 @@ class RegionAgent:
                         "score_overall": float(row.get("score_overall", 0.0)),
                         "score_breakdown": features,
                         "growth_breakdown": growth_breakdown,
+                        "technical_indicators": technical_indicators,
                         "thesis": thesis,
                         "risks": risks,
                         "evidence": evidence,
