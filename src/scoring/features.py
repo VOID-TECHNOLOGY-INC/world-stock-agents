@@ -15,6 +15,13 @@ def build_features_from_dummy(region: str, as_of: date, size: int = 120) -> pd.D
     tickers = [f"{region}{i:03d}" for i in range(size)]
     names = [f"{region}-Company-{i:03d}" for i in range(size)]
 
+    # ダミーのテクニカル指標を生成
+    mom_12m = rng.normal(0.1, 0.2, size)  # -10%から+30%程度
+    mom_6m = rng.normal(0.05, 0.15, size)
+    mom_3m = rng.normal(0.02, 0.1, size)
+    mom_1m = rng.normal(0.01, 0.05, size)
+    volume_trend = rng.normal(1.0, 0.3, size).clip(0.5, 2.0)  # 0.5-2.0倍
+    
     df = pd.DataFrame({
         "ticker": tickers,
         "name": names,
@@ -25,6 +32,20 @@ def build_features_from_dummy(region: str, as_of: date, size: int = 120) -> pd.D
         "quality_dilution": rng.normal(0.6, 0.15, size).clip(0, 1),
         "news_signal": rng.normal(0.5, 0.2, size).clip(0, 1),
     })
+    
+    # 生のテクニカル指標データを各行に追加
+    raw_technical_data = []
+    for i in range(size):
+        raw_technical_data.append({
+            "mom_12m": mom_12m[i],
+            "mom_6m": mom_6m[i],
+            "mom_3m": mom_3m[i],
+            "mom_1m": mom_1m[i],
+            "volume_trend": volume_trend[i],
+        })
+    
+    df["_raw_technical"] = raw_technical_data
+    
     return df
 
 
@@ -84,6 +105,14 @@ def build_features_from_prices(
             "technical_volume_trend": vol_trend,
             "quality_dilution": 0.5,
             "news_signal": 0.5,
+            # 生のテクニカル指標データ（LLM分析用）
+            "_raw_technical": {
+                "mom_12m": m12,
+                "mom_6m": m6,
+                "mom_3m": m3,
+                "mom_1m": m1,
+                "volume_trend": vol_trend,
+            },
         })
 
     return pd.DataFrame(feats)

@@ -3,6 +3,8 @@ from __future__ import annotations
 import os
 from typing import Any, List, Tuple
 
+import pandas as pd
+
 try:
     from openai import OpenAI
 except Exception:  # pragma: no cover - optional dependency at runtime
@@ -65,22 +67,46 @@ def generate_thesis_and_risks(
     name: str,
     region: str,
     features: dict[str, Any],
+    technical_indicators: dict[str, Any] = None,
 ) -> tuple[str, list[str]]:
-    """特徴量のサマリから thesis と risks を生成（日本語）。"""
+    """特徴量とテクニカル指標から包括的な分析を生成（日本語）。"""
     system = (
-        "あなたは株式アナリストです。事実ベースで簡潔に日本語で回答し、推測は避けます。"
+        "あなたは株式アナリストです。ファンダメンタル指標とテクニカル指標の両方を考慮して、"
+        "包括的な投資分析を行ってください。事実ベースで簡潔に日本語で回答し、推測は避けます。"
     )
     lines = [
         f"ティッカー: {ticker}",
         f"名称: {name}",
         f"地域: {region}",
-        "特徴量 (0..1 正規化):",
+        "ファンダメンタル指標 (0..1 正規化):",
     ]
+    
+    # ファンダメンタル指標
     for k, v in features.items():
-        lines.append(f"- {k}: {v}")
+        if k != "technical":
+            lines.append(f"- {k}: {v:.3f}")
+    
+    # テクニカル指標（生データ）
+    if technical_indicators:
+        lines.append("\nテクニカル指標:")
+        for k, v in technical_indicators.items():
+            if v is not None and not pd.isna(v):
+                if k.startswith("mom_"):
+                    # モメンタムは%表示
+                    lines.append(f"- {k}: {v:.1%}")
+                elif k == "volume_trend":
+                    # 出来高トレンドは比率表示
+                    lines.append(f"- {k}: {v:.2f}")
+                else:
+                    lines.append(f"- {k}: {v}")
+            else:
+                lines.append(f"- {k}: N/A")
+    
     user = (
         "\n".join(lines)
-        + "\n\n1-2文で投資仮説(thesis)を記述し、その後に最大3点の主なリスク(risks)を箇条書きで提示してください。"
+        + "\n\nこれらの指標を基に、包括的な投資仮説(thesis)を1-2文で記述し、"
+        + "その後に最大3点の主なリスク(risks)を箇条書きで提示してください。"
+        + "テクニカル指標から読み取れる価格動向と出来高の特徴も考慮してください。"
     )
 
     text = _chat(system, user)
@@ -91,7 +117,7 @@ def generate_thesis_and_risks(
         )
     # 簡易パース: 最初の段落をthesis、ハイフン行をrisksとみなす
     lines = [l.strip() for l in text.splitlines() if l.strip()]
-    thesis = lines[0]
+    thesis = lines[0] if lines else f"{name} は基本指標とモメンタムが相対的に良好。"
     risks: List[str] = [l.lstrip("- ・* ") for l in lines[1:4]] if len(lines) > 1 else []
     if not risks:
         risks = ["需給悪化", "規制変更", "マクロ下振れ"]
