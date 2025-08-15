@@ -61,3 +61,28 @@ def test_region_agent_uses_fundamentals_and_news_to_update_scores():
 
 	assert any(abs(v - 0.5) > 1e-9 for v in fund_vals), f"fundamentalが全て0.5: {fund_vals}"
 	assert any(abs(v - 0.5) > 1e-9 for v in news_vals), f"newsが全て0.5: {news_vals}"
+
+
+def test_etf_fundamentals_are_skipped():
+	"""ETFのfundamentals取得がスキップされることを検証"""
+	from src.tools.fundamentals import FundamentalsClient, _is_etf
+	
+	# ETF判定のテスト
+	assert _is_etf("SPY") == True
+	assert _is_etf("QQQ") == True
+	assert _is_etf("1306.T") == True
+	assert _is_etf("2800.HK") == True
+	assert _is_etf("AAPL") == False
+	assert _is_etf("MSFT") == False
+	
+	# ETFを含む銘柄リストでテスト
+	client = FundamentalsClient(max_workers=1, request_interval=0.1)
+	etf_tickers = ["SPY", "QQQ", "AAPL"]
+	
+	# ETFはスキップされることを確認（実際のAPI呼び出しは行わない）
+	result = client._fetch_raw_financials(etf_tickers)
+	
+	# ETFはresultに含まれないことを確認
+	assert "SPY" not in result
+	assert "QQQ" not in result
+	# AAPLは実際のAPI呼び出しで失敗するかもしれないが、スキップはされない

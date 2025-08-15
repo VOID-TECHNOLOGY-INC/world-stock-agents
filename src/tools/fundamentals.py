@@ -9,16 +9,41 @@ import logging
 import pandas as pd
 
 
+def _is_etf(ticker: str) -> bool:
+    """ETFかどうかを判定（fundamentals取得をスキップするため）"""
+    etf_suffixes = ['ETF', '.ETF']
+    etf_names = {
+        'SPY', 'QQQ', 'IWM', 'EFA', 'EEM', 'VTI', 'VEA', 'VWO', 
+        'GLD', 'SLV', 'TLT', 'XLF', 'SMH', 'VOO', 'NLR', 'VGT', 
+        'CIBR', 'MCHI', 'FXI', 'ASHR', 'KWEB', 'IEX', 'VGK', 'EZU', 
+        'FEZ', '1605.T', '1321.T', '1306.T', '1348.T', '2558.T', 
+        '1557.T', '2800.HK', '2828.HK'
+    }
+    
+    # ETF名での判定
+    if ticker.upper() in etf_names:
+        return True
+    
+    # サフィックスでの判定
+    ticker_upper = ticker.upper()
+    for suffix in etf_suffixes:
+        if ticker_upper.endswith(suffix):
+            return True
+    
+    return False
+
+
 @dataclass
 class FundamentalsClient:
     """Fundamentals via yfinance/yahooquery (MVP: 実装容易性重視の薄いラッパ)。
     本番では安定APIに差し替え可能なIFを維持する。
     """
     
-    def __init__(self, max_workers: int = 4, retry_attempts: int = 2, retry_delay: float = 1.0):
-        self.max_workers = max_workers
+    def __init__(self, max_workers: int = 1, retry_attempts: int = 2, retry_delay: float = 1.0, request_interval: float = 0.5):
+        self.max_workers = max_workers  # レート制限対策でデフォルト1に変更
         self.retry_attempts = retry_attempts
         self.retry_delay = retry_delay
+        self.request_interval = request_interval  # リクエスト間隔（秒）
         self._cache = {}  # 簡易キャッシュ
 
     def _fetch_single_ticker_with_retry(self, ticker: str) -> Optional[Dict[str, float]]:
@@ -27,6 +52,11 @@ class FundamentalsClient:
         一部ティッカーで一時的に空データが返ることがあるため、
         リトライ時には短いスリープを挟み再試行する。
         """
+        # ETFはfundamentals取得をスキップ
+        if _is_etf(ticker):
+            logging.info(f"Skipping fundamentals for ETF: {ticker}")
+            return None
+            
         import yfinance as yf
         
         for attempt in range(self.retry_attempts):
@@ -109,6 +139,8 @@ class FundamentalsClient:
                 )):
                     raise RuntimeError("empty fundamentals")
 
+                # 成功時はリクエスト間隔を設ける（レート制限対策）
+                time.sleep(self.request_interval)
                 return data
                 
             except Exception as e:
@@ -136,22 +168,36 @@ class FundamentalsClient:
         if not tickers:
             return result
         
-        # 並列で財務データ取得
-        with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
-            future_to_ticker = {
-                executor.submit(self._fetch_single_ticker_with_retry, t): t 
-                for t in tickers
-            }
+        # ETFを除外
+        non_etf_tickers = [t for t in tickers if not _is_etf(t)]
+        logging.info(f"Processing {len(non_etf_tickers)} non-ETF tickers out of {len(tickers)} total")
+        
+        # バッチサイズを制限（レート制限対策）
+        batch_size = 10
+        batches = [non_etf_tickers[i:i+batch_size] for i in range(0, len(non_etf_tickers), batch_size)]
+        
+        for batch_idx, batch in enumerate(batches):
+            if batch_idx > 0:
+                # バッチ間隔を設ける（レート制限対策）
+                time.sleep(2.0)
+                logging.info(f"Processing batch {batch_idx + 1}/{len(batches)}")
             
-            for future in as_completed(future_to_ticker):
-                ticker = future_to_ticker[future]
-                try:
-                    data = future.result()
-                    if data is not None:
-                        result[ticker] = data
-                except Exception as e:
-                    logging.warning(f"Error fetching fundamentals for {ticker}: {e}")
-                    continue
+            # 並列で財務データ取得
+            with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
+                future_to_ticker = {
+                    executor.submit(self._fetch_single_ticker_with_retry, t): t 
+                    for t in batch
+                }
+                
+                for future in as_completed(future_to_ticker):
+                    ticker = future_to_ticker[future]
+                    try:
+                        data = future.result()
+                        if data is not None:
+                            result[ticker] = data
+                    except Exception as e:
+                        logging.warning(f"Error fetching fundamentals for {ticker}: {e}")
+                        continue
         
         # キャッシュに保存
         self._cache[cache_key] = {

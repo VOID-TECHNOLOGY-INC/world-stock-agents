@@ -14,10 +14,11 @@ class NewsClient:
     戻り値: list[dict(ticker,title,url,date)]
     """
     
-    def __init__(self, max_workers: int = 3, retry_attempts: int = 2, retry_delay: float = 0.5):
-        self.max_workers = max_workers  # レート制限を考慮して控えめに
+    def __init__(self, max_workers: int = 1, retry_attempts: int = 2, retry_delay: float = 0.5, request_interval: float = 0.5):
+        self.max_workers = max_workers  # レート制限対策でデフォルト1に変更
         self.retry_attempts = retry_attempts
         self.retry_delay = retry_delay
+        self.request_interval = request_interval  # リクエスト間隔（秒）
         self._cache = {}  # 簡易キャッシュ
 
     def _fetch_single_ticker_with_retry(self, ticker: str, since: date) -> List[Dict]:
@@ -79,7 +80,8 @@ class NewsClient:
                             "date": dt_str,
                         })
                 
-                # 成功したらループを抜ける
+                # 成功したらリクエスト間隔を設けてループを抜ける
+                time.sleep(self.request_interval)
                 break
                 
             except Exception as e:
@@ -103,21 +105,31 @@ class NewsClient:
         if not tickers:
             return items
         
-        # 並列でニュース取得
-        with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
-            future_to_ticker = {
-                executor.submit(self._fetch_single_ticker_with_retry, t, since): t 
-                for t in tickers
-            }
+        # バッチサイズを制限（レート制限対策）
+        batch_size = 10
+        batches = [tickers[i:i+batch_size] for i in range(0, len(tickers), batch_size)]
+        
+        for batch_idx, batch in enumerate(batches):
+            if batch_idx > 0:
+                # バッチ間隔を設ける（レート制限対策）
+                time.sleep(2.0)
+                logging.info(f"Processing news batch {batch_idx + 1}/{len(batches)}")
             
-            for future in as_completed(future_to_ticker):
-                ticker = future_to_ticker[future]
-                try:
-                    ticker_items = future.result()
-                    items.extend(ticker_items)
-                except Exception as e:
-                    logging.warning(f"Error fetching news for {ticker}: {e}")
-                    continue
+            # 並列でニュース取得
+            with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
+                future_to_ticker = {
+                    executor.submit(self._fetch_single_ticker_with_retry, t, since): t 
+                    for t in batch
+                }
+                
+                for future in as_completed(future_to_ticker):
+                    ticker = future_to_ticker[future]
+                    try:
+                        ticker_items = future.result()
+                        items.extend(ticker_items)
+                    except Exception as e:
+                        logging.warning(f"Error fetching news for {ticker}: {e}")
+                        continue
         
         # キャッシュに保存
         self._cache[cache_key] = {
