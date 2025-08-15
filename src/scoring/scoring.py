@@ -6,18 +6,18 @@ import pandas as pd
 
 @dataclass
 class ScoreWeights:
-    fundamental: float = 0.4
-    technical: float = 0.35
-    quality: float = 0.15
-    news: float = 0.10
-    growth: float = 0.0  # 既存スコアに影響しない初期値（必要に応じて引き上げ）
+    fundamental: float = 0.35  # 0.4 → 0.35
+    technical: float = 0.30    # 0.35 → 0.30
+    quality: float = 0.15      # 変更なし
+    news: float = 0.10         # 変更なし
+    growth: float = 0.10       # 0.0 → 0.10
 
 
 def score_candidates(df_features: pd.DataFrame, weights: ScoreWeights) -> pd.DataFrame:
     """特徴量を合成してスコアリング。
 
     入力: normalize済みの特徴量
-    出力: score_fundamental, score_technical, score_quality, score_news, score_overall
+    出力: score_fundamental, score_technical, score_quality, score_news, score_growth, score_overall
     """
     df = df_features.copy()
     df["score_fundamental"] = (

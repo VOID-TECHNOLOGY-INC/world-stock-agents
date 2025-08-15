@@ -86,6 +86,14 @@ class RegionAgent:
                     "news": float(row.get("score_news", 0.0)),
                     "growth": float(row.get("score_growth", 0.0)),
                 }
+                
+                # 成長スコアの詳細表示を追加
+                growth_breakdown = {
+                    "revenue_cagr": float(row.get("growth_revenue_cagr", 0.5)),
+                    "eps_growth": float(row.get("growth_eps_growth", 0.5)),
+                    "overall": float(row.get("score_growth", 0.0)),
+                }
+                
                 if is_openai_configured():
                     thesis, risks = generate_thesis_and_risks(ticker, name, self.name, features)
                 else:
@@ -100,6 +108,7 @@ class RegionAgent:
                         "name": name,
                         "score_overall": float(row.get("score_overall", 0.0)),
                         "score_breakdown": features,
+                        "growth_breakdown": growth_breakdown,
                         "thesis": thesis,
                         "risks": risks,
                         "evidence": evidence,

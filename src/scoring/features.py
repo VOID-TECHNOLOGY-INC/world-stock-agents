@@ -98,11 +98,13 @@ def merge_fundamentals(features_df: pd.DataFrame, fundamentals_df: pd.DataFrame)
         df["fundamental_fcf_margin"] = (
             df["fcf_margin"].astype(float, errors="ignore").fillna(df["fundamental_fcf_margin"])
         )
-    # 成長指標
+    # 成長指標（正規化を適用）
     if "revenue_cagr" in df.columns:
-        df["growth_revenue_cagr"] = df["revenue_cagr"].astype(float, errors="ignore")
+        from .normalize import normalize_growth_rate
+        df["growth_revenue_cagr"] = df["revenue_cagr"].astype(float, errors="ignore").apply(normalize_growth_rate)
     if "eps_growth" in df.columns:
-        df["growth_eps_growth"] = df["eps_growth"].astype(float, errors="ignore")
+        from .normalize import normalize_growth_rate
+        df["growth_eps_growth"] = df["eps_growth"].astype(float, errors="ignore").apply(normalize_growth_rate)
     return df
 
 
