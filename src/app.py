@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from datetime import date, datetime
 from pathlib import Path
-from typing import List
+from typing import List, Optional, Any
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import threading
 
@@ -22,6 +22,8 @@ from .agents.regions import RegionAgent
 from .agents.chair import build_report
 from .agents.optimizer import optimize_portfolio
 from .tools.marketdata import MarketDataClient
+from .tools.fundamentals import FundamentalsClient
+from .tools.news import NewsClient
 from .agents.risk import RiskAgent
 from .agents.macro import MacroAgent
 from .tools.risk_tool import compute_returns
@@ -59,19 +61,32 @@ def _create_status_table():
     return table
 
 
-def _process_region_parallel(region: str, as_of: date, top_n: int, output_dir: Path, progress, task_id: int) -> tuple[str, dict, dict]:
-    """地域別エージェントを並列実行する関数"""
+def _process_region_parallel(region: str, as_of: date, top_n: int, output_dir: Path, progress, task_id: int, workers: int = 4) -> tuple[str, dict, Any]:
+    """地域別エージェントを並列実行する関数（スレッド安全な進捗更新）"""
+    def _safe_update(**kwargs) -> None:
+        try:
+            # rich.Progress は call_from_thread を提供
+            progress.call_from_thread(progress.update, task_id, **kwargs)
+        except Exception:
+            progress.update(task_id, **kwargs)
     try:
-        # エージェント初期化
-        progress.update(task_id, advance=20, description=f"[cyan]地域 {region} エージェント初期化中...")
-        agent = RegionAgent(name=region, universe="REAL", tools={"marketdata": MarketDataClient()})
+        # クライアントを共有（キャッシュ/接続の再利用）
+        _safe_update(advance=20, description=f"[cyan]地域 {region} エージェント初期化中...")
+        mkt = MarketDataClient(max_workers=workers)
+        fcli = FundamentalsClient(max_workers=workers)
+        ncli = NewsClient(max_workers=min(workers, 3))  # ニュースは控えめに
+        agent = RegionAgent(name=region, universe="REAL", tools={
+            "marketdata": mkt,
+            "fundamentals": fcli,
+            "news": ncli,
+        })
         
         # 候補選定
-        progress.update(task_id, advance=30, description=f"[cyan]地域 {region} 候補選定中...")
+        _safe_update(advance=30, description=f"[cyan]地域 {region} 候補選定中...")
         out = agent.run(as_of=as_of, top_n=top_n)
         
         # ファイル保存
-        progress.update(task_id, advance=20, description=f"[cyan]地域 {region} ファイル保存中...")
+        _safe_update(advance=20, description=f"[cyan]地域 {region} ファイル保存中...")
         out_path = output_dir / f"candidates_{region}_{as_of.strftime('%Y%m%d')}.json"
         write_json(out_path, out)
         
@@ -87,21 +102,23 @@ def _process_region_parallel(region: str, as_of: date, top_n: int, output_dir: P
             },
         )
         
-        # 価格データ取得
-        progress.update(task_id, advance=20, description=f"[cyan]地域 {region} 価格データ取得中...")
-        mkt = MarketDataClient()
+        # 価格データ取得（同一クライアントを再利用）
+        _safe_update(advance=20, description=f"[cyan]地域 {region} 価格データ取得中...")
         uni_tickers = [c["ticker"] for c in out.get("candidates", [])]
         region_prices = {}
         if uni_tickers:
             prices, _ = mkt.get_prices(uni_tickers, lookback_days=260)
             region_prices = prices
         
-        progress.update(task_id, advance=10, description=f"[green]地域 {region} 完了")
+        _safe_update(advance=10, description=f"[green]地域 {region} 完了")
         
         return region, out, region_prices
         
     except Exception as e:
-        progress.update(task_id, description=f"[red]地域 {region} エラー: {str(e)}")
+        try:
+            progress.call_from_thread(progress.update, task_id, description=f"[red]地域 {region} エラー: {str(e)}")
+        except Exception:
+            progress.update(task_id, description=f"[red]地域 {region} エラー: {str(e)}")
         raise e
 
 
@@ -113,6 +130,7 @@ def candidates(
     top_n: int = typer.Option(50, help="各地域の上位候補数"),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="詳細な進捗表示"),
     parallel: bool = typer.Option(True, "--parallel/--sequential", help="並列実行（デフォルト）または逐次実行"),
+    workers: int = typer.Option(4, "--workers", "-w", help="並列ワーカー数（デフォルト: 4）"),
 ):
     """地域別エージェントを実行し、候補JSONを出力する。"""
     as_of = _parse_date(run_date)
@@ -142,7 +160,7 @@ def candidates(
             if parallel and len(region_list) > 1:
                 # 並列実行
                 tasks = {}
-                with ThreadPoolExecutor(max_workers=min(len(region_list), 4)) as executor:
+                with ThreadPoolExecutor(max_workers=min(len(region_list), workers)) as executor:
                     # タスクを開始
                     for region in region_list:
                         task_id = progress.add_task(f"[cyan]地域 {region} 処理中...", total=100)
@@ -166,7 +184,11 @@ def candidates(
                     
                     # エージェント実行
                     progress.update(task, advance=20, description=f"[cyan]地域 {region} エージェント初期化中...")
-                    agent = RegionAgent(name=region, universe="REAL", tools={"marketdata": MarketDataClient()})
+                    agent = RegionAgent(name=region, universe="REAL", tools={
+                        "marketdata": MarketDataClient(max_workers=workers),
+                        "fundamentals": FundamentalsClient(max_workers=workers),
+                        "news": NewsClient(max_workers=min(workers, 3))
+                    })
                     
                     progress.update(task, advance=30, description=f"[cyan]地域 {region} 候補選定中...")
                     out = agent.run(as_of=as_of, top_n=top_n)
@@ -196,7 +218,11 @@ def candidates(
         
         results: List[dict] = []
         for region in region_list:
-            agent = RegionAgent(name=region, universe="REAL", tools={"marketdata": MarketDataClient()})
+            agent = RegionAgent(name=region, universe="REAL", tools={
+                "marketdata": MarketDataClient(max_workers=workers),
+                "fundamentals": FundamentalsClient(max_workers=workers),
+                "news": NewsClient(max_workers=min(workers, 3))
+            })
             out = agent.run(as_of=as_of, top_n=top_n)
             results.append(out)
             out_path = Path(cfg.output_dir) / f"candidates_{region}_{as_of.strftime('%Y%m%d')}.json"
@@ -273,11 +299,12 @@ def run(
     output: str = typer.Option("./artifacts", help="出力先ディレクトリ"),
     top_n: int = typer.Option(50, help="各地域の上位候補数"),
     risk_aversion: float = typer.Option(0.0, help="リスク許容度（大きいほどリターン重視）。0でボラ最小。"),
-    target_vol: float = typer.Option(None, help="年率ボラ上限（例: 0.18）。未指定で制約なし。"),
+    target_vol: Optional[float] = typer.Option(None, help="年率ボラ上限（例: 0.18）。未指定で制約なし。"),
     target: str = typer.Option("min_vol", help="目的関数: min_vol / max_return（risk_aversion>0 ならトレードオフ）。"),
-    macro_csv: str = typer.Option(None, help="マクロ初期重みCSVのパス（region,weight）。未指定でデフォルト重み。"),
+    macro_csv: Optional[str] = typer.Option(None, help="マクロ初期重みCSVのパス（region,weight）。未指定でデフォルト重み。"),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="詳細な進捗表示"),
     parallel: bool = typer.Option(True, "--parallel/--sequential", help="並列実行（デフォルト）または逐次実行"),
+    workers: int = typer.Option(4, "--workers", "-w", help="並列ワーカー数（デフォルト: 4）"),
 ):
     """週次エンドツーエンド実行。候補→最適化→レポ出力。"""
     as_of = _parse_date(run_date)
@@ -317,7 +344,7 @@ def run(
             if parallel and len(region_list) > 1:
                 # 並列実行
                 tasks = {}
-                with ThreadPoolExecutor(max_workers=min(len(region_list), 4)) as executor:
+                with ThreadPoolExecutor(max_workers=min(len(region_list), workers)) as executor:
                     # タスクを開始
                     for region in region_list:
                         task_id = progress.add_task(f"[cyan]地域 {region} 処理中...", total=100)
@@ -339,7 +366,11 @@ def run(
                     task_region = progress.add_task(f"[cyan]地域 {region} 処理中...", total=100)
                     
                     progress.update(task_region, advance=20, description=f"[cyan]地域 {region} エージェント初期化中...")
-                    agent = RegionAgent(name=region, universe="REAL", tools={"marketdata": MarketDataClient()})
+                    agent = RegionAgent(name=region, universe="REAL", tools={
+                        "marketdata": MarketDataClient(max_workers=workers),
+                        "fundamentals": FundamentalsClient(max_workers=workers),
+                        "news": NewsClient(max_workers=min(workers, 3))
+                    })
                     
                     progress.update(task_region, advance=30, description=f"[cyan]地域 {region} 候補選定中...")
                     out = agent.run(as_of=as_of, top_n=top_n)
@@ -362,7 +393,7 @@ def run(
                     )
                     
                     progress.update(task_region, advance=20, description=f"[cyan]地域 {region} 価格データ取得中...")
-                    mkt = MarketDataClient()
+                    mkt = MarketDataClient(max_workers=workers)
                     uni_tickers = [c["ticker"] for c in out.get("candidates", [])]
                     if uni_tickers:
                         prices, _ = mkt.get_prices(uni_tickers, lookback_days=260)

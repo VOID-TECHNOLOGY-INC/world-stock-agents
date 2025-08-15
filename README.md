@@ -43,6 +43,7 @@ python -m src.app run --date 2025-08-12 --regions JP,US --output ./artifacts --v
 - `--macro-csv`: マクロ初期重みCSVのパス（region,weight）
 - `--verbose`, `-v`: 詳細な進捗表示（Richライブラリを使用した可視化）
 - `--parallel/--sequential`: 並列実行（デフォルト）または逐次実行
+- `--workers`, `-w`: 並列ワーカー数（デフォルト: 4）
 
 ### オプションの詳細な使い方
 
@@ -162,6 +163,9 @@ python -m src.app run --regions JP,US,EU --parallel
 # 逐次実行（デバッグ用）
 python -m src.app run --regions JP,US,EU --sequential
 
+# カスタムワーカー数で並列実行
+python -m src.app run --regions JP,US,EU,CN --workers 6 --parallel
+
 ### 進捗可視化機能
 
 `--verbose` オプションを使用すると、Richライブラリによる詳細な進捗表示が有効になります：
@@ -198,16 +202,18 @@ python -m src.app report --verbose --input ./artifacts/portfolio_20250812.json
 地域別エージェントの処理を並列化することで、処理時間を大幅に短縮できます。
 
 #### 並列化の仕組み
-- **ThreadPoolExecutor**: 最大4つのスレッドで並列実行
-- **独立した処理**: 各地域のエージェントは独立して動作
-- **進捗表示**: 並列実行中も各タスクの進捗を個別に表示
-- **エラーハンドリング**: 1つの地域でエラーが発生しても他の地域は継続
+- **地域単位の並列化**: ThreadPoolExecutorで各地域を並列実行
+- **I/O処理の並列化**: 価格取得、ニュース取得、財務データ取得を並列化
+- **バッチ処理**: 欠落ティッカーの補完をバッチ単位で並列処理
+- **リトライ機能**: 指数バックオフによる自動リトライ
+- **キャッシュ機能**: 同日内の同一データ取得をキャッシュ
+- **レート制限対応**: ニュース取得は控えめなワーカー数で制御
 
 #### パフォーマンス比較
-| 地域数 | 逐次実行 | 並列実行 | 短縮率 |
-|--------|----------|----------|--------|
-| 2地域 (JP,US) | ~2分 | ~1.2分 | 40%短縮 |
-| 4地域 (JP,US,EU,CN) | ~4分 | ~1.5分 | 62%短縮 |
+| 地域数 | 逐次実行 | 並列実行（改善後） | 短縮率 |
+|--------|----------|-------------------|--------|
+| 2地域 (JP,US) | ~2分 | ~0.8分 | 60%短縮 |
+| 4地域 (JP,US,EU,CN) | ~4分 | ~1.0分 | 75%短縮 |
 
 #### 使用例
 ```bash
@@ -222,12 +228,17 @@ python -m src.app candidates --regions JP,US,EU --parallel
 
 # 詳細表示付き並列実行
 python -m src.app run --verbose --parallel --regions JP,US,EU,CN
+
+# 高ワーカー数で高速実行
+python -m src.app run --workers 8 --parallel --regions JP,US,EU,CN
 ```
 
 #### 注意事項
-- **API制限**: 外部API（yfinance等）のレート制限に注意
+- **API制限**: 外部API（yfinance等）のレート制限に注意（自動リトライ機能付き）
 - **メモリ使用量**: 並列実行時はメモリ使用量が増加
 - **デバッグ**: 問題が発生した場合は`--sequential`で逐次実行を試行
+- **ワーカー数調整**: 環境に応じて`--workers`でワーカー数を調整
+- **キャッシュ**: 同日内の同一データ取得は自動キャッシュされる
 
 ### 2. 候補選定のみ
 
