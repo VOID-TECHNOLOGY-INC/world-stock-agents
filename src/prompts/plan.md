@@ -33,50 +33,99 @@
 3. scoring/features.py 拡張 [MVP Done]
    - `merge_fundamentals` と `merge_news_signal` を実装、normalize→score 合成に反映
 
-### P1: マクロ・配分
-1. agents/macro.py
+### P1: マクロ・配分 [Done]
+1. agents/macro.py [Done]
    - 為替・金利・商品指数から地域初期重みを提案 (当面はCSV/定数ドライバ)
-2. app.py のシーケンス
+2. app.py のシーケンス [Done]
    - macro → risk → optimizer → chair を明示
 
-### P1: レポート強化
-1. agents/chair.py 拡張
+### P1: レポート強化 [Done]
+1. agents/chair.py 拡張 [Done]
    - 採否理由 (上位3指標 + 根拠リンク) / マクロ概況 / リスク表・図を出力
    - Matplotlib で相関ヒートマップ・配分円グラフを生成し、画像をMDに埋め込み
 2. tools/report.py (将来)
    - md → pdf 変換の実装ポイント
 
-### P1: 最適化機能の拡張（improvement-1）
-1. tools/optimizer_tool.py
+### P1: 最適化機能の拡張（improvement-1）[Done]
+1. tools/optimizer_tool.py [Done]
    - `MVConfig` に `risk_aversion`, `target_vol`, `target` を追加
    - 目的関数にリスク許容度（var − λ·ret）と `target_vol` のボラ上限制約を実装
    - 地域上限制約は明示的な不等式制約で実装（既存対応済み）
-2. agents/optimizer.py
+2. agents/optimizer.py [Done]
    - `constraints` から各パラメータを受け渡し
-3. app.py (`run`)
+3. app.py (`run`) [Done]
    - `--risk-aversion`, `--target-vol`, `--target` オプション追加
-4. tests
+4. tests [Done]
    - リスク許容度による期待リターンの増加確認
    - `target_vol` 上限制約の遵守・到達不能時の挙動
    - 統合テスト（optimize_portfolio レベル）
 
-### P2: 品質と運用
-1. tests/ (unit / integration) [強化]
+### P2: 品質と運用 [In Progress]
+1. tests/ (unit / integration) [強化 - テスト駆動開発で実装中]
    - 追加カバレッジ（feedback-2.mdより）
-     - RegionAgent.run: 実データ経路/フォールバック/OpenAI未設定時の安定性
-     - Optimizer.optimize_portfolio: 選抜/フォールバック/現金整合性
-     - RiskAgent.run: パネル結合/空入力時の空メトリクス
-     - marketdata.get_prices: MultiIndex/単一/欠落補完/期間フィルタ
-     - risk_tool.compute_returns: log方式テスト
-     - optimizer_tool: 地域ペナルティ動作テスト
-     - news.NewsClient: yfinance import失敗時フォールバック
-     - build_features_from_prices: mom1/3/6/12、出来高比、NaN境界
-     - ScoreWeights: growth重み>0時のscore_overall変動
-     - chair.build_report: use_ai=True 経路、画像保存ユーティリティ
-     - I/O・設定・CLI: loaders/writers/config、Typer CLIのE2E（CliRunner）
-2. ロギング/監査
+     - RegionAgent.run: 実データ経路/フォールバック/OpenAI未設定時の安定性 [Done]
+     - Optimizer.optimize_portfolio: 選抜/フォールバック/現金整合性 [Done]
+     - RiskAgent.run: パネル結合/空入力時の空メトリクス [Done]
+     - marketdata.get_prices: MultiIndex/単一/欠落補完/期間フィルタ [In Progress]
+     - risk_tool.compute_returns: log方式テスト [In Progress]
+     - optimizer_tool: 地域ペナルティ動作テスト [In Progress]
+     - news.NewsClient: yfinance import失敗時フォールバック [In Progress]
+     - build_features_from_prices: mom1/3/6/12、出来高比、NaN境界 [In Progress]
+     - ScoreWeights: growth重み>0時のscore_overall変動 [In Progress]
+     - chair.build_report: use_ai=True 経路、画像保存ユーティリティ [In Progress]
+     - I/O・設定・CLI: loaders/writers/config、Typer CLIのE2E（CliRunner） [In Progress]
+   
+   **詳細テスト実装計画:**
+   - **RegionAgent.run 包括的テスト**
+     - 実データ経路の成功ケース
+     - フォールバック（ダミーデータ生成）
+     - OpenAI未設定時の安定性
+     - 空データの処理
+     - top_n制限の動作確認
+   
+   - **Optimizer.optimize_portfolio テスト**
+     - 選抜機能のテスト
+     - フォールバック機能のテスト
+     - 現金整合性のテスト
+   
+   - **RiskAgent.run テスト**
+     - パネル結合のテスト
+     - 空入力時の空メトリクス生成
+   
+   - **MarketDataClient 拡張テスト**
+     - MultiIndex処理のテスト
+     - 単一ティッカー処理のテスト
+     - 欠落補完のテスト
+     - 期間フィルタのテスト
+   
+   - **RiskTool 拡張テスト**
+     - log方式でのリターン計算テスト
+   
+   - **OptimizerTool 拡張テスト**
+     - 地域ペナルティ動作のテスト
+   
+   - **NewsClient 拡張テスト**
+     - yfinance import失敗時のフォールバック
+   
+   - **Features 拡張テスト**
+     - mom1/3/6/12のテスト
+     - 出来高比のテスト
+     - NaN境界のテスト
+   
+   - **ScoreWeights 拡張テスト**
+     - growth重み>0時のscore_overall変動
+   
+   - **Chair.build_report 拡張テスト**
+     - use_ai=True経路のテスト
+     - 画像保存ユーティリティのテスト
+   
+   - **I/O・設定・CLI テスト**
+     - loaders/writers/configのテスト
+     - Typer CLIのE2Eテスト（CliRunner）
+
+2. ロギング/監査 [Pending]
    - logs/{YYYYMMDD}/... に外部取得の source, timestamp, request-id を保存
-3. GitHub Actions
+3. GitHub Actions [Pending]
    - 週次ジョブ (cron) で make run-weekly を実行
 
 ## インタフェースとI/O
@@ -97,6 +146,9 @@
 - 市場休日・時系列欠損: 左結合 + 前方埋め
 
 ## スケジュール (目安)
-- Week2 前半: リスク・最適化、ニュースツール（yfinance.news）
-- Week2 後半: ファンダツール/スコア統合の安定化、レポ強化
-- Week3: マクロ、PDF、テスト・CI
+- Week2 前半: リスク・最適化、ニュースツール（yfinance.news）[Done]
+- Week2 後半: ファンダツール/スコア統合の安定化、レポ強化 [Done]
+- Week3: マクロ、PDF、テスト・CI [In Progress]
+  - 現在: テスト駆動開発による品質向上
+  - 次: ロギング/監査機能の実装
+  - 最終: GitHub Actions CI/CD の構築
