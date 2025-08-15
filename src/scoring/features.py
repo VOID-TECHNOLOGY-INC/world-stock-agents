@@ -84,6 +84,14 @@ def build_features_from_prices(
             "technical_volume_trend": vol_trend,
             "quality_dilution": 0.5,
             "news_signal": 0.5,
+            # 生のテクニカル指標データ（LLM分析用）
+            "_raw_technical": {
+                "mom_12m": m12,
+                "mom_6m": m6,
+                "mom_3m": m3,
+                "mom_1m": m1,
+                "volume_trend": vol_trend,
+            },
         })
 
     return pd.DataFrame(feats)
