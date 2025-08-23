@@ -8,6 +8,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import threading
 
 import typer
+import pandas as pd
 from rich import print
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskProgressColumn, TimeElapsedColumn
@@ -18,6 +19,7 @@ from rich.layout import Layout
 
 from .config import load_config
 from .io.writers import ensure_output_dir, write_json, write_text
+from .io.loaders import load_universe
 from .agents.regions import RegionAgent
 from .agents.chair import build_report
 from .agents.optimizer import optimize_portfolio
@@ -27,6 +29,7 @@ from .tools.news import NewsClient
 from .agents.risk import RiskAgent
 from .agents.macro import MacroAgent
 from .tools.risk_tool import compute_returns
+from .tools.buy_signal import evaluate_buy_signals
 
 
 app = typer.Typer(add_completion=False, no_args_is_help=True)
@@ -576,6 +579,91 @@ def run(
         out_md = Path(cfg.output_dir) / f"report_{as_of.strftime('%Y%m%d')}.md"
         write_text(out_md, md)
         print(f"✅ report saved: {out_md}")
+
+
+@app.command()
+def buy_signal(
+    regions: str = typer.Option("JP,US", help="対象地域 (CSV)"),
+    run_date: str = typer.Option(datetime.today().strftime("%Y-%m-%d"), "--date"),
+    output: str = typer.Option("./artifacts", help="出力先ディレクトリ"),
+    pe_threshold: float = typer.Option(15.0, help="P/E比率の閾値"),
+    pb_threshold: float = typer.Option(1.5, help="P/B比率の閾値"),
+    revenue_growth_threshold: float = typer.Option(0.05, help="売上成長率の閾値"),
+    eps_growth_threshold: float = typer.Option(0.10, help="EPS成長率の閾値"),
+    peg_ratio_threshold: float = typer.Option(1.0, help="PEG比率の閾値"),
+    min_signals: int = typer.Option(3, help="BUY判定に必要な条件数"),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="詳細な進捗表示"),
+):
+    """買いシグナルを評価してCSVファイルに出力"""
+    cfg = load_config(output)
+    ensure_output_dir(cfg.output_dir)
+    
+    as_of = _parse_date(run_date)
+    region_list = [r.strip() for r in regions.split(",")]
+    
+    if verbose:
+        console.print(f"[bold]Buy Signal Analysis[/bold] regions={region_list} date={as_of}")
+    
+    all_tickers = []
+    for region in region_list:
+        try:
+            uni = load_universe(region)
+            all_tickers.extend(uni["ticker"].tolist())
+        except Exception as e:
+            console.print(f"❌ [red]地域 {region} のユニバース読み込みエラー:[/red] {str(e)}")
+    
+    if not all_tickers:
+        console.print("[red]処理対象のティッカーが見つかりません[/red]")
+        return
+    
+    if verbose:
+        console.print(f"📊 [cyan]評価対象: {len(all_tickers)} ティッカー[/cyan]")
+    
+    # buy_signal評価実行
+    result_df = evaluate_buy_signals(
+        tickers=all_tickers,
+        pe_threshold=pe_threshold,
+        pb_threshold=pb_threshold,
+        revenue_growth_threshold=revenue_growth_threshold,
+        eps_growth_threshold=eps_growth_threshold,
+        peg_ratio_threshold=peg_ratio_threshold,
+        min_signals=min_signals,
+    )
+    
+    # 結果をCSVに保存
+    output_path = Path(cfg.output_dir) / f"buy_signals_{as_of.strftime('%Y%m%d')}.csv"
+    result_df.to_csv(output_path, index=False)
+    
+    # BUY判定された銘柄を表示
+    buy_candidates = result_df[result_df["decision"] == "BUY"]
+    
+    if verbose:
+        console.print(f"✅ [green]buy_signals saved:[/green] {output_path}")
+        console.print(f"📈 [green]BUY判定: {len(buy_candidates)} 銘柄[/green]")
+        
+        if not buy_candidates.empty:
+            table = Table(title="BUY判定銘柄")
+            table.add_column("ティッカー", style="cyan")
+            table.add_column("P/E", style="yellow")
+            table.add_column("P/B", style="yellow")
+            table.add_column("売上成長", style="green")
+            table.add_column("EPS成長", style="green")
+            table.add_column("PEG", style="yellow")
+            table.add_column("スコア", style="bold")
+            
+            for _, row in buy_candidates.head(20).iterrows():
+                table.add_row(
+                    row["ticker"],
+                    f"{row['pe']:.2f}" if pd.notna(row['pe']) else "N/A",
+                    f"{row['pb']:.2f}" if pd.notna(row['pb']) else "N/A",
+                    f"{row['revenue_growth']:.1%}" if pd.notna(row['revenue_growth']) else "N/A",
+                    f"{row['eps_growth']:.1%}" if pd.notna(row['eps_growth']) else "N/A",
+                    f"{row['peg_ratio']:.2f}" if pd.notna(row['peg_ratio']) else "N/A",
+                    str(row['score'])
+                )
+            console.print(table)
+    
+    console.print(Panel(f"[bold green]買いシグナル分析完了[/bold green]\nBUY判定: {len(buy_candidates)} 銘柄", title="結果"))
 
 
 if __name__ == "__main__":

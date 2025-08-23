@@ -29,12 +29,18 @@ def _fetch_metrics_yfinance(ticker: str) -> Dict[str, float]:
         # If any of the calls above fail we simply leave eps_growth as None
         pass
 
+    # PEG比率を手動で計算
+    pe = info.get("trailingPE")
+    peg_ratio = None
+    if pe is not None and eps_growth is not None and eps_growth > 0:
+        peg_ratio = pe / (eps_growth * 100)  # eps_growthは小数なので100倍してパーセントに変換
+
     return {
-        "pe": info.get("trailingPE"),
+        "pe": pe,
         "pb": info.get("priceToBook"),
         "revenue_growth": info.get("revenueGrowth"),
         "eps_growth": eps_growth,
-        "peg_ratio": info.get("pegRatio"),
+        "peg_ratio": peg_ratio,
     }
 
 

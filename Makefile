@@ -9,6 +9,7 @@ setup:
 .PHONY: run-weekly
 run-weekly:
 	@. .venv/bin/activate && $(PY) -m src.app run --date $${DATE:-2025-08-12} --regions $${REGIONS:-JP,US} --output ./artifacts
+	@. .venv/bin/activate && $(PY) -m src.app buy-signal --date $${DATE:-2025-08-12} --regions $${REGIONS:-JP,US} --output ./artifacts --verbose
 
 .PHONY: candidates
 candidates:
@@ -18,5 +19,9 @@ candidates:
 report:
 	@AS_OF=$${DATE:-2025-08-12}; FILE=./artifacts/portfolio_$${AS_OF//-/}.json; \
 	. .venv/bin/activate && $(PY) -m src.app report --input $$FILE --output ./artifacts
+
+.PHONY: buy-signal
+buy-signal:
+	@. .venv/bin/activate && $(PY) -m src.app buy-signal --date $${DATE:-2025-08-12} --regions $${REGIONS:-JP,US} --output ./artifacts --verbose
 
 

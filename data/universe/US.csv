@@ -1,129 +1,26 @@
 ticker,name
 AAPL,Apple Inc.
 MSFT,Microsoft Corp
-AMZN,Amazon.com Inc
 NVDA,NVIDIA Corp
-GOOGL,Alphabet Inc Class A
 META,Meta Platforms Inc
 TSLA,Tesla Inc
-GOOG,Alphabet Inc Class C
-BRK-B,Berkshire Hathaway Class B
-UNH,UnitedHealth Group
-JPM,JPMorgan Chase & Co
-XOM,Exxon Mobil
-JNJ,Johnson & Johnson
-V,Visa Inc
-PG,Procter & Gamble
-AVGO,Broadcom Inc
-HD,Home Depot
-CVX,Chevron Corp
-MA,Mastercard Inc
-WMT,Walmart Inc
-PFE,Pfizer Inc
-BAC,Bank of America
-ABBV,AbbVie Inc
-COST,Costco Wholesale
-CRM,Salesforce Inc
-KO,Coca-Cola
-PEP,PepsiCo
-TMO,Thermo Fisher Scientific
-MRK,Merck & Co
-CSCO,Cisco Systems
-ABT,Abbott Laboratories
-ACN,Accenture Plc
-LLY,Eli Lilly & Co
-NFLX,Netflix Inc
-ADBE,Adobe Inc
-VZ,Verizon Communications
-DHR,Danaher Corp
-TXN,Texas Instruments
-NEE,NextEra Energy
-COP,ConocoPhillips
-PM,Philip Morris International
-RTX,Raytheon Technologies
-UNP,Union Pacific
-ORCL,Oracle Corp
-NKE,Nike Inc
-WFC,Wells Fargo
-BMY,Bristol-Myers Squibb
-LIN,Linde Plc
-QCOM,Qualcomm Inc
-UPS,United Parcel Service
-LOW,Lowe's Cos
-T,AT&T Inc
-AMGN,Amgen Inc
-HON,Honeywell International
-AMD,Advanced Micro Devices
-GS,Goldman Sachs Group
-CAT,Caterpillar Inc
-IBM,International Business Machines
-MDT,Medtronic Plc
-SPGI,S&P Global Inc
-BLK,BlackRock Inc
-MMC,Marsh & McLennan
-DE,Deere & Co
-AXP,American Express Co
-CVS,CVS Health Corp
-GILD,Gilead Sciences
-C,Citigroup Inc
-NOW,ServiceNow Inc
-SCHW,Charles Schwab Corp
-AMT,American Tower Corp
-INTU,Intuit Inc
-MO,Altria Group
-BKNG,Booking Holdings Inc
-GE,General Electric
-TMUS,T-Mobile US Inc
-SYK,Stryker Corp
-MDLZ,Mondelez International
-ADP,Automatic Data Processing
-ISRG,Intuitive Surgical
-TJX,TJX Cos
-VRTX,Vertex Pharmaceuticals
-CME,CME Group Inc
-MU,Micron Technology
-PLD,Prologis Inc
-CB,Chubb Ltd
-ZTS,Zoetis Inc
-SHW,Sherwin-Williams Co
-SO,Southern Co
-NSC,Norfolk Southern Corp
-DUK,Duke Energy Corp
-PYPL,PayPal Holdings Inc
-ITW,Illinois Tool Works
-ICE,Intercontinental Exchange
-CL,Colgate-Palmolive Co
-REGN,Regeneron Pharmaceuticals
-GD,General Dynamics Corp
-APD,Air Products & Chemicals
-EQIX,Equinix Inc
-AON,Aon Plc
-SPY,SPDR S&P 500 ETF Trust
-QQQ,Invesco QQQ Trust
-IWM,iShares Russell 2000 ETF
-EFA,iShares MSCI EAFE ETF
-EEM,iShares MSCI Emerging Markets ETF
-VTI,Vanguard Total Stock Market ETF
-VEA,Vanguard FTSE Developed Markets ETF
-VWO,Vanguard FTSE Emerging Markets ETF
-GLD,SPDR Gold Shares
-SLV,iShares Silver Trust
-TLT,iShares 20+ Year Treasury Bond ETF
-PLTR,Palantir Technologies Inc
-RDDT,Reddit Inc
 JMIA,Jumia Technologies AG
-SPOT,Spotify Technology SA
-XLF,Financial Select Sector SPDR Fund
-SMH,VanEck Semiconductor ETF
-VOO,Vanguard S&P 500 ETF
-MELI,MercadoLibre Inc
-NLR,VanEck Uranium+Nuclear Energy ETF
-VGT,Vanguard Information Technology ETF
-RKLB,Rocket Lab USA Inc
-SEZL,Sezzle Inc
-ALAB,Astera Labs Inc
-CIBR,First Trust NASDAQ Cybersecurity ETF
-NET,Cloudflare Inc
 SOFI,SoFi Technologies Inc
+RKLB,Rocket Lab USA Inc
 NBIS,Nebius Group NV
+ADMA,ADMA Biologics Inc
+MELI,MercadoLibre Inc
 SHOP,Shopify Inc
+HOOD,Robinhood Markets Inc
+PINS,Pinterest Inc
+NET,Cloudflare Inc
+PLTR,Palantir Technologies Inc
+ALAB,Astera Labs Inc
+SPOT,Spotify Technology SA
+RDDT,Reddit Inc
+DHR,Danaher Corp
+LITE,Lumentum Holdings Inc
+HSAI,Hesai Group
+SPGI,S&P Global Inc
+INCY,Incyte Corp
+DUOL,Duolingo Inc
