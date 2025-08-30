@@ -60,7 +60,7 @@ class TestTechnicalLLMAnalysis:
             assert "volume_trend" in raw_tech
 
     @patch("src.agents.regions.is_openai_configured")
-    @patch("src.agents.regions.generate_thesis_and_risks")
+    @patch("src.agents.regions.generate_thesis_and_risks_openai")
     def test_region_agent_passes_technical_indicators(self, mock_generate, mock_configured):
         """RegionAgentがテクニカル指標をLLMに渡すことをテスト"""
         mock_configured.return_value = True

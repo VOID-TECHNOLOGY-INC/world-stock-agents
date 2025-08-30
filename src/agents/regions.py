@@ -15,7 +15,14 @@ from ..scoring.features import (
     merge_news_signal,
 )
 from ..scoring.normalize import normalize_features
-from .openai_agent import is_openai_configured, generate_thesis_and_risks
+from .openai_agent import (
+    is_openai_configured,
+    generate_thesis_and_risks as generate_thesis_and_risks_openai,
+)
+from .perplexity_agent import (
+    is_perplexity_configured,
+    generate_thesis_and_risks as generate_thesis_and_risks_perplexity,
+)
 from ..io.loaders import load_universe
 from ..tools.marketdata import MarketDataClient
 from ..tools.fundamentals import FundamentalsClient
@@ -105,7 +112,11 @@ class RegionAgent:
                             technical_indicators[k] = None
                 
                 if is_openai_configured():
-                    thesis, risks = generate_thesis_and_risks(
+                    thesis, risks = generate_thesis_and_risks_openai(
+                        ticker, name, self.name, features, technical_indicators
+                    )
+                elif is_perplexity_configured():
+                    thesis, risks = generate_thesis_and_risks_perplexity(
                         ticker, name, self.name, features, technical_indicators
                     )
                 else:
