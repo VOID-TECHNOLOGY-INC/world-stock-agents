@@ -1,0 +1,49 @@
+import os
+from unittest.mock import patch, MagicMock
+from datetime import date
+
+import pytest
+
+from src.agents.perplexity_agent import (
+    is_perplexity_configured,
+    generate_thesis_and_risks,
+)
+from src.agents.regions import RegionAgent
+
+
+def test_is_perplexity_configured(monkeypatch):
+    monkeypatch.delenv("PPLX_API_KEY", raising=False)
+    assert not is_perplexity_configured()
+    monkeypatch.setenv("PPLX_API_KEY", "dummy")
+    assert is_perplexity_configured()
+
+
+@patch("src.agents.perplexity_agent.requests.post")
+def test_generate_thesis_and_risks(mock_post, monkeypatch):
+    monkeypatch.setenv("PPLX_API_KEY", "dummy")
+    mock_resp = MagicMock()
+    mock_resp.json.return_value = {
+        "choices": [{"message": {"content": "サンプルthesis\n- risk1\n- risk2"}}]
+    }
+    mock_resp.raise_for_status = lambda: None
+    mock_post.return_value = mock_resp
+    thesis, risks = generate_thesis_and_risks(
+        "TEST", "Test Corp", "US", {"fundamental": 0.5}, {}
+    )
+    assert "thesis" in thesis or "サンプル" in thesis
+    assert risks == ["risk1", "risk2"]
+
+
+@patch("src.agents.regions.load_universe")
+@patch("src.agents.regions.is_openai_configured", return_value=False)
+@patch("src.agents.regions.is_perplexity_configured", return_value=True)
+@patch("src.agents.regions.generate_thesis_and_risks_perplexity")
+def test_region_agent_uses_perplexity(
+    mock_generate, mock_pplx_cfg, mock_openai_cfg, mock_load
+):
+    mock_generate.return_value = ("Test thesis", ["Risk1", "Risk2"])
+    mock_load.side_effect = Exception("fallback")
+    agent = RegionAgent("TEST", "dummy", {})
+    result = agent.run(date(2025, 8, 15), top_n=1)
+    assert mock_generate.called
+    assert result["candidates"][0]["thesis"] == "Test thesis"

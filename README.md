@@ -15,8 +15,10 @@ source .venv/bin/activate  # Linux/Mac
 pip install -r requirements.txt
 
 # 環境変数の設定
-cp .env.example .env  # OPENAI_API_KEY を設定
+cp .env.example .env  # OPENAI_API_KEY や PPLX_API_KEY を設定
 ```
+
+- `PPLX_API_KEY` を設定すると、銘柄リサーチにPerplexity APIが使用されます。
 
 ## 基本的な使い方
 
