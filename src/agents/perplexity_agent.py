@@ -14,7 +14,7 @@ def is_perplexity_configured() -> bool:
     return bool(os.environ.get("PPLX_API_KEY"))
 
 
-def _chat(system: str, user: str, model: str = "pplx-7b-online") -> str:
+def _chat(system: str, user: str, model: str = "pplx-70b-online") -> str:
     if not is_perplexity_configured():
         return ""
     headers = {
