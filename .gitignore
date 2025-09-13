@@ -13,6 +13,7 @@ __pycache__/
 .venv/
 venv/
 env/
+.env
 
 # Local artifacts and logs
 artifacts/

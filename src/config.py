@@ -17,6 +17,10 @@ class AppConfig:
     cash_min: float
     cash_max: float
 
+    # Optimization knobs (defaults)
+    risk_aversion: float
+    target_vol: Optional[float]
+
 
 def load_config(output_dir: str) -> AppConfig:
     openai_api_key = os.environ.get("OPENAI_API_KEY")
@@ -35,6 +39,8 @@ def load_config(output_dir: str) -> AppConfig:
         position_limit=position_limit,
         cash_min=cash_min,
         cash_max=cash_max,
+        risk_aversion=0.0,
+        target_vol=None,
     )
 
 
