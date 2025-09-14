@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 from unittest.mock import patch, MagicMock
 from datetime import date
@@ -47,3 +49,25 @@ def test_region_agent_uses_perplexity(
     result = agent.run(date(2025, 8, 15), top_n=1)
     assert mock_generate.called
     assert result["candidates"][0]["thesis"] == "Test thesis"
+
+
+@patch("src.agents.perplexity_agent.requests.post")
+def test_generate_thesis_and_risks_json_parsing(mock_post, monkeypatch):
+    """JSONで返ってきたときに堅牢にパースできること。"""
+    monkeypatch.setenv("PPLX_API_KEY", "dummy")
+    content = (
+        '{"thesis":"短期の成長余地あり","risks":["需給悪化","規制"],'
+        '"references":[{"url":"https://example.com","title":"news"}]}'
+    )
+    mock_resp = MagicMock()
+    mock_resp.json.return_value = {"choices": [{"message": {"content": content}}]}
+    mock_resp.raise_for_status = lambda: None
+    mock_post.return_value = mock_resp
+
+    thesis, risks = generate_thesis_and_risks(
+        "TEST", "Test Corp", "US",
+        {"fundamental": 0.7, "growth": 0.6},
+        {"mom_1m": 0.05, "volume_trend": 1.2},
+    )
+    assert thesis.startswith("短期")
+    assert risks[:2] == ["需給悪化", "規制"]
