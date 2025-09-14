@@ -106,13 +106,20 @@ def optimize_portfolio(
     ]
     cash_weight = round(max(0.0, 1.0 - sum(x["weight"] for x in weights)), 6)
 
+    # notesに設定を反映
+    notes_settings = (
+        f"target={cfg.target} risk_aversion={cfg.risk_aversion} "
+        f"target_vol={cfg.target_vol if cfg.target_vol is not None else 'None'}"
+    )
+    notes = f"P0 mean-variance ({note_flag}); {notes_settings}" if note_flag else f"P0 mean-variance; {notes_settings}"
+
     return {
         "as_of": as_of,
         "region_limits": region_limits,
         "position_limit": position_limit,
         "weights": weights,
         "cash_weight": cash_weight,
-        "notes": f"P0 mean-variance ({note_flag})",
+        "notes": notes,
     }
 
 

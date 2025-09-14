@@ -215,3 +215,33 @@ class TestOptimizerPortfolioComprehensive:
         # 地域制限を遵守していることを確認
         assert jp_total <= 0.10
         assert us_total <= 0.20
+
+
+def test_optimize_portfolio_notes_contains_settings():
+    candidates_all = [
+        {"region": "US", "candidates": [
+            {"ticker": "AAPL", "score_overall": 0.9},
+            {"ticker": "MSFT", "score_overall": 0.8},
+            {"ticker": "GOOG", "score_overall": 0.7},
+        ]}
+    ]
+
+    constraints = {
+        "region_limits": {"US": 0.5},
+        "position_limit": 0.2,
+        "cash_min": 0.0,
+        "cash_max": 0.1,
+        "as_of": "2025-09-01",
+        "risk_aversion": 3.0,
+        "target_vol": 0.18,
+        "target": "min_vol",
+    }
+
+    result = optimize_portfolio(candidates_all, constraints, prices_df=None)
+
+    assert isinstance(result.get("notes"), str)
+    notes = result["notes"]
+    # 設定の一部がnotes文字列に含まれていること
+    assert "risk_aversion=3.0" in notes
+    assert "target_vol=0.18" in notes
+    assert "target=min_vol" in notes
