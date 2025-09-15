@@ -29,6 +29,7 @@ def _chat(system: str, user: str, model: str = "pplx-70b-online") -> str:
             {"role": "user", "content": user},
         ],
         "temperature": 0.3,
+        "max_tokens": 600,
     }
     try:
         resp = requests.post(API_URL, headers=headers, json=payload, timeout=30)
@@ -59,7 +60,7 @@ def generate_thesis_and_risks(
     system = (
         "あなたは株式アナリストです。事実ベースで簡潔に日本語で回答し、推測は避けます。\n"
         "出力は可能ならJSONで返してください: {\"thesis\": str, \"risks\": [str,...], \"references\": [ {\"url\": str, \"title\": str} ] }\n"
-        "thesisは1-2文、risksは最大3件、重複や見出し語は不要です。"
+        "thesisは1-2文、risksは最大3件、重複や見出し語は不要です。必要に応じて要点を補足し、全体として過度に短すぎない表現にしてください。"
     )
 
     lines: list[str] = []

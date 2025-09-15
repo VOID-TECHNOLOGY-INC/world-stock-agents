@@ -71,3 +71,32 @@ def test_generate_thesis_and_risks_json_parsing(mock_post, monkeypatch):
     )
     assert thesis.startswith("短期")
     assert risks[:2] == ["需給悪化", "規制"]
+
+
+@patch("src.agents.perplexity_agent.requests.post")
+def test_perplexity_payload_has_max_tokens_and_longer_instruction(mock_post, monkeypatch):
+    monkeypatch.setenv("PPLX_API_KEY", "dummy")
+
+    captured_payload = {}
+
+    def _capture(*args, **kwargs):
+        nonlocal captured_payload
+        captured_payload = kwargs.get("json", {})
+        mock_resp = MagicMock()
+        mock_resp.json.return_value = {"choices": [{"message": {"content": "{\"thesis\":\"長めの出力\",\"risks\":[\"A\"]}"}}]}
+        mock_resp.raise_for_status = lambda: None
+        return mock_resp
+
+    mock_post.side_effect = _capture
+
+    generate_thesis_and_risks(
+        "TEST", "Test Corp", "US",
+        {"fundamental": 0.7, "growth": 0.6},
+        {"mom_1m": 0.05, "volume_trend": 1.2},
+    )
+
+    # max_tokens が含まれる
+    assert isinstance(captured_payload.get("max_tokens"), int)
+    # systemに「1-2文」指定の他に長めの指示文が含まれていることをゆるく確認
+    system_msg = captured_payload.get("messages", [{}])[0].get("content", "")
+    assert "thesisは1-2文" in system_msg
