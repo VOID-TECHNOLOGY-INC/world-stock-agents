@@ -60,7 +60,7 @@ def generate_thesis_and_risks(
     system = (
         "あなたは株式アナリストです。事実ベースで簡潔に日本語で回答し、推測は避けます。\n"
         "出力は可能ならJSONで返してください: {\"thesis\": str, \"risks\": [str,...], \"references\": [ {\"url\": str, \"title\": str} ] }\n"
-        "thesisは1-2文、risksは最大3件、重複や見出し語は不要です。必要に応じて要点を補足し、全体として過度に短すぎない表現にしてください。"
+        "thesisは2〜4文で要点を網羅、risksは最大3件を簡潔かつ実質的に。重複や見出し語は不要で、過度に短すぎない表現にしてください。"
     )
 
     lines: list[str] = []
@@ -113,7 +113,7 @@ def generate_thesis_and_risks(
 
     user = (
         "\n".join(lines)
-        + "\n\nこれらの指標とニュースに基づき、投資仮説(thesis)を1-2文で、"
+        + "\n\nこれらの指標とニュースに基づき、投資仮説(thesis)を2〜4文で、"
         + "次に主なリスク(risks)を最大3点、箇条書きで提示してください。"
         + "可能ならJSONで返してください。JSONが難しければテキストでも可。"
     )

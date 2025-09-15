@@ -97,6 +97,6 @@ def test_perplexity_payload_has_max_tokens_and_longer_instruction(mock_post, mon
 
     # max_tokens が含まれる
     assert isinstance(captured_payload.get("max_tokens"), int)
-    # systemに「1-2文」指定の他に長めの指示文が含まれていることをゆるく確認
+    # systemに長めの指示（2-4文程度/過度に短すぎない）が含まれていることを緩く確認
     system_msg = captured_payload.get("messages", [{}])[0].get("content", "")
-    assert "thesisは1-2文" in system_msg
+    assert "過度に短すぎない" in system_msg
