@@ -4,9 +4,11 @@ import json
 
 import pytest
 
-pytest.importorskip(
-    "mcp", minversion="1.30", reason="Install the optional example dependencies to run these tests",
+transport = pytest.importorskip(
+    "mcp.client.streamable_http", reason="Install the optional example dependencies to run these tests",
 )
+if not hasattr(transport, "streamable_http_client"):
+    pytest.skip("Install the optional example dependencies to run these tests", allow_module_level=True)
 import httpx
 
 from examples import parallel_research as research
