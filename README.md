@@ -20,6 +20,8 @@ cp .env.example .env  # OPENAI_API_KEY や PPLX_API_KEY を設定
 
 - `PPLX_API_KEY` を設定すると、銘柄リサーチにPerplexity APIが使用されます。
 
+候補銘柄の決算発表やリスク情報を追加で確認するには、[Parallel Search MCP の独立した調査サンプル](doc/parallel-research.md)を利用できます。APIキー不要のウェブ検索・ページ取得を手動で実行し、根拠URLを確認できます。
+
 ## 基本的な使い方
 
 ### 1. エンドツーエンド実行（推奨）
